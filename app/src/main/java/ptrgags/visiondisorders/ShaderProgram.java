@@ -29,9 +29,8 @@ class ShaderProgram {
         GLES20.glAttachShader(program, frag.getShaderHandle());
         GLES20.glLinkProgram(program);
 
-        //Check for errors
-        GLES20.glUseProgram(program);
-        MainActivity.checkGLError("Error compiling program!");
+        //Use this program so we can check for errors in the main app.
+        //use();
 
         //Return the program handle
         return program;
@@ -69,5 +68,9 @@ class ShaderProgram {
 
     public int getProgramHandle() {
         return programHandle;
+    }
+
+    public void use() {
+        GLES20.glUseProgram(programHandle);
     }
 }

@@ -15,7 +15,7 @@ uniform mat4 projection;
 varying vec4 v_color;
 
 void main() {
-    float ambientStrength = 0.2;
+    float ambientStrength = 0.8;
 
     v_color = ambientStrength * color;
     gl_Position = projection * view * model * position;
