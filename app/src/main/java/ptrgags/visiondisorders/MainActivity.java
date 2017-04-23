@@ -27,7 +27,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private ShaderProgram planeProgram;
     private Camera camera;
 
-    private static final int NUM_COLOR_BLINDNESS_MODES = 2;
+    private static final int NUM_COLOR_BLINDNESS_MODES = 3;
     private int colorBlindnessMode = 0;
 
     /**

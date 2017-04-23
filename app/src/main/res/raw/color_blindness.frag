@@ -10,6 +10,7 @@ uniform int colorblind_mode;
 /** Color modes */
 const int MODE_NORMAL = 0;
 const int MODE_PROTANOPIA = 1;
+const int MODE_TRITANOPIA = 2; //TODO: Change me
 /**
 const int MODE_PROTANOMALY = 2;
 const int MODE_DEUTERANOPIA = 3;
@@ -37,6 +38,8 @@ void main() {
         gl_FragColor = v_color;
     else if (colorblind_mode == MODE_PROTANOPIA)
         gl_FragColor = PROTANOPIA * v_color;
+    else if (colorblind_mode == MODE_TRITANOPIA)
+        gl_FragColor = TRITANOPIA * v_color;
     else {
         //We have a problem make everything magenta as an error.
          gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
