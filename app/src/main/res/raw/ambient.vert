@@ -3,6 +3,8 @@ precision mediump float;
 attribute vec4 position;
 // Color of the vertex
 attribute vec4 color;
+// Vertex normal
+attribute vec3 normal;
 
 //Object -> World space
 uniform mat4 model;

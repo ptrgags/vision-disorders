@@ -46,6 +46,8 @@ abstract class Model {
 
     public abstract FloatBuffer getModelColors();
 
+    public abstract FloatBuffer getModelNormals();
+
     public static FloatBuffer makeVertexBuffer(float[] vertices) {
         ByteBuffer bytebuffer = ByteBuffer.allocateDirect(vertices.length * 4);
         bytebuffer.order(ByteOrder.nativeOrder());
