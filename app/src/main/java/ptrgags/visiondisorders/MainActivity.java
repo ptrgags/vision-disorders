@@ -1,5 +1,6 @@
 package ptrgags.visiondisorders;
 
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
@@ -29,6 +30,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     private static final int NUM_COLOR_BLINDNESS_MODES = 3;
     private int colorBlindnessMode = 0;
+    private long frameCount = 0;
+    /** Set this to a large number to simulate akinetopsia */
+    private int akinetopsiaFrames = 1;
 
     /**
      * Init the Google VR view.
@@ -56,6 +60,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private void buildScene() {
         final float[] FLOOR_COLOR = new float[]{0.5f, 0, 1, 1};
         //Maybe make a Scene class?
+        /*
         Model floor = new Plane(FLOOR_COLOR);
         floor.scale(14.0f, 1.0f, 14.0f);
         floor.translate(0.0f, -15f, 0.0f);
@@ -65,6 +70,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         ceiling.rotate(180, 1.0f, 0.0f, 0.0f);
         ceiling.translate(0.0f, 15f, 0.0f);
         room.add(ceiling);
+        */
 
         final float[] WALL_COLOR = new float[]{1.0f, 0.5f, 0, 1};
         Model wall = new Plane(WALL_COLOR);
@@ -72,6 +78,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         wall.rotate(90, 0.0f, 0.0f, 1.0f);
         wall.translate(15f, 0.0f, 0.0f);
         room.add(wall);
+        /*
         wall = new Plane(WALL_COLOR);
         wall.scale(14.0f, 1.0f, 14.0f);
         wall.rotate(90, 0.0f, 0.0f, -1.0f);
@@ -87,6 +94,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         wall.rotate(90, -1.0f, 0.0f, 0.0f);
         wall.translate(0.0f, 0.0f, 15f);
         room.add(wall);
+        */
 
         buildCubes();
 
@@ -135,10 +143,15 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     @Override
     public void onNewFrame(HeadTransform headTransform) {
+        frameCount++;
     }
 
     @Override
     public void onDrawEye(Eye eye) {
+        // Slow down the frame rate significantly to simulate akinetopsia
+        if (frameCount % akinetopsiaFrames != 0)
+            return;
+
         //Set drawing bits.
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         GLES20.glEnable(GLES20.GL_CULL_FACE);
@@ -149,10 +162,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         float[] projection = eye.getPerspective(0.1f, 100.0f);
 
         //Calculate the view matrix
-        float[] eyeView = eye.getEyeView();
         float[] cameraView = camera.getViewMatrix();
+        float[] eyeView = eye.getEyeView();
         float[] view = new float[16];
         Matrix.multiplyMM(view, 0, eyeView, 0, cameraView, 0);
+        //RVM rvm = new CoronalRVM(180.0f);
+        //float[] view = rvm.rotateView(cameraView, eye);
+        //Matrix.rotateM(view, 0, 180, 0, 0, -1);
 
         //Draw planes.
         planeProgram.use();
@@ -189,7 +205,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             GLES20.glEnableVertexAttribArray(normalParam);
 
             //TODO: Do we want the walls?
-            //GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6);
+            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6);
 
             GLES20.glDisableVertexAttribArray(posParam);
             GLES20.glDisableVertexAttribArray(colorParam);
