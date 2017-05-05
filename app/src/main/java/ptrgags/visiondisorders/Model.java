@@ -21,8 +21,25 @@ abstract class Model {
         Matrix.setIdentityM(scaleMatrix, 0);
     }
 
-    public void translate(float x, float y, float z) {
+    /**
+     * Like Translate, but it resets the translation to the identitty
+     * @param x x-coordinate
+     * @param y y-coordinate
+     * @param z z-coordinate
+     */
+    public void translateTo(float x, float y, float z) {
+        Matrix.setIdentityM(translateMatrix, 0);
         Matrix.translateM(translateMatrix, 0, x, y, z);
+    }
+
+    /**
+     * Translate the model from the current position.
+     * @param dx the change in x position
+     * @param dy the change in y position
+     * @param dz the change in z position
+     */
+    public void translate(float dx, float dy, float dz) {
+        Matrix.translateM(translateMatrix, 0, dx, dy, dz);
     }
 
     public void scale(float x, float y, float z) {

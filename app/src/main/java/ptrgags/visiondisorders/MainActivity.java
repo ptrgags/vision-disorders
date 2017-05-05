@@ -1,11 +1,9 @@
 package ptrgags.visiondisorders;
 
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.opengl.GLES20;
-import android.opengl.Matrix;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 
 import com.google.vr.ndk.base.AndroidCompat;
 import com.google.vr.sdk.base.Eye;
@@ -24,7 +22,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 
 public class MainActivity extends GvrActivity implements GvrView.StereoRenderer {
     private List<Scene> scenes = new ArrayList<>();
-    private int selectedScene = 0;
+    private int selectedScene = 1;
 
     /**
      * Init the Google VR view.
@@ -32,11 +30,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private void initGvrView() {
         setContentView(R.layout.common_ui);
         GvrView view = (GvrView) findViewById(R.id.gvr_view);
-        //TODO: What does this do?
         view.setEGLConfigChooser(8, 8, 8, 8, 16, 8);
 
         view.setRenderer(this);
-        //TODO: What does this do?
         view.setTransitionViewEnabled(true);
 
         if (view.setAsyncReprojectionEnabled(true)) {
@@ -45,32 +41,24 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         setGvrView(view);
     }
 
-    /**
-     * Build the geometry of the scene. Most
-     * things will not move so this is nice.
-     */
-    private void buildScene() {
-        for (Scene scene : scenes)
-            scene.initScene();
-
-        checkGLError("Ready to Draw");
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initGvrView();
         createScenes();
-        //buildScene();
     }
 
     private void createScenes() {
         Scene colorblindness = new Colorblindness();
         scenes.add(colorblindness);
+        Scene akin = new Akinetopsia();
+        scenes.add(akin);
 
         for (Scene scene : scenes)
             scene.initScene();
+
+        checkGLError("Ready to Draw");
     }
 
 
@@ -133,5 +121,21 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             Log.e("VisualDisorders", message);
             throw new RuntimeException(message);
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            //Go to the previous scene
+            selectedScene--;
+            selectedScene %= scenes.size();
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+            selectedScene++;
+            selectedScene %= scenes.size();
+            return true;
+        }
+        else
+            return false;
     }
 }

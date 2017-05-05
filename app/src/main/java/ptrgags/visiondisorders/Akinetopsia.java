@@ -6,21 +6,31 @@ import android.opengl.Matrix;
 import com.google.vr.sdk.base.Eye;
 
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
-public class Colorblindness extends Scene {
-    private static final int NUM_COLOR_BLINDNESS_MODES = 3;
+/**
+ * Created by Peter on 5/5/2017.
+ */
 
-    private List<Model> cubes = new ArrayList<>();
-    private ShaderProgram cubeProgram;
-    private int colorBlindnessMode = 0;
+public class Akinetopsia extends Scene {
+    /** Normal vision, don't skip a frame */
+    private static final int RATE_NORMAL = 1;
+    /** Akinetopsia. Only refresh when frameCount is divisible by this number */
+    private static final int RATE_AKINETOPSIA = 60;
+
     private Camera camera;
+    private ShaderProgram cubeProgram;
+    private long frameCount = 0;
+    private int akinetopsiaRate = RATE_NORMAL;
+
+    //TODO: This will change to a list of cube
+    private Model cube;
 
     @Override
     public void initScene() {
-        initCubes();
+        float[] cubeColor = new float[] {0.0f, 0.5f, 1.0f, 1.0f};
+        cube = new Cube(cubeColor);
+        cube.scale(2.0f, 1.0f, 1.0f);
 
         camera = new Camera();
         camera.setPosition(0.0f, 0.0f, 0.1f);
@@ -30,6 +40,10 @@ public class Colorblindness extends Scene {
 
     @Override
     public void onDraw(Eye eye) {
+        // This skips rendering frames when in akinetopsia mode
+        if (frameCount % akinetopsiaRate != 0)
+            return;
+
         //Set drawing bits.
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         GLES20.glEnable(GLES20.GL_CULL_FACE);
@@ -50,8 +64,9 @@ public class Colorblindness extends Scene {
                 cubeProgram.getUniform("projection"), 1, false, projection, 0);
         GLES20.glUniformMatrix4fv(
                 cubeProgram.getUniform("view"), 1, false, view, 0);
+        //TODO: Remove me
         GLES20.glUniform1i(
-                cubeProgram.getUniform("colorblind_mode"), colorBlindnessMode);
+                cubeProgram.getUniform("colorblind_mode"), 0);
 
         int modelParam = cubeProgram.getUniform("model");
         int posParam = cubeProgram.getAttribute("position");
@@ -65,33 +80,25 @@ public class Colorblindness extends Scene {
 
         // Since all the cubes have the same vertices and normals, only load
         // them into the shader once
-        Model firstCube = cubes.get(0);
-        FloatBuffer modelCoords = firstCube.getModelCoords();
+        FloatBuffer modelCoords = cube.getModelCoords();
         GLES20.glVertexAttribPointer(
                 posParam, 4, GLES20.GL_FLOAT, false, 0, modelCoords);
-        FloatBuffer modelNormals = firstCube.getModelNormals();
+        FloatBuffer modelNormals = cube.getModelNormals();
         GLES20.glVertexAttribPointer(
                 normalParam, 3, GLES20.GL_FLOAT, false, 0, modelNormals);
 
         // Render each cube. Only the color and position needs to change.
-        for (Model m : cubes) {
-            float[] model = m.getModelMatrix();
-            GLES20.glUniformMatrix4fv(modelParam, 1, false, model, 0);
+        float[] model = cube.getModelMatrix();
+        GLES20.glUniformMatrix4fv(modelParam, 1, false, model, 0);
 
-            FloatBuffer modelColors = m.getModelColors();
-            GLES20.glVertexAttribPointer(
-                    colorParam, 4, GLES20.GL_FLOAT, false, 0, modelColors);
+        FloatBuffer modelColors = cube.getModelColors();
+        GLES20.glVertexAttribPointer(
+                colorParam, 4, GLES20.GL_FLOAT, false, 0, modelColors);
 
-            //TODO: models should have a way to get the number of vertices
-            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 36);
+        //TODO: models should have a way to get the number of vertices
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 36);
 
-            checkGLError("Render Cube");
-        }
-
-        // Disable the attribute buffers
-        GLES20.glDisableVertexAttribArray(posParam);
-        GLES20.glDisableVertexAttribArray(colorParam);
-        GLES20.glDisableVertexAttribArray(normalParam);
+        checkGLError("Render Cube");
     }
 
     @Override
@@ -110,35 +117,20 @@ public class Colorblindness extends Scene {
         checkGLError("Plane Params");
     }
 
-    private void initCubes() {
-        final int CUBE_RADIUS = 3;
-        final float OFFSET = 4.0f;
-        for (int i = -CUBE_RADIUS; i <= CUBE_RADIUS; i++) {
-            for (int j = -CUBE_RADIUS; j <= CUBE_RADIUS; j++) {
-                for (int k = -CUBE_RADIUS; k <= CUBE_RADIUS; k++) {
-                    //We only care about coordinates on the outside of the cube
-                    int maxComponent = Math.max(
-                            Math.max(Math.abs(i), Math.abs(j)), Math.abs(k));
-                    if (maxComponent < CUBE_RADIUS)
-                        continue;
+    @Override
+    public void onFrame() {
+        frameCount++;
 
-                    float[] color = new float[] {
-                            (i + 2.0f) / 4.0f,
-                            (j + 2.0f) / 4.0f,
-                            (k + 2.0f) / 4.0f,
-                            1
-                    };
-                    Model cube = new Cube(color);
-                    cube.translate(OFFSET * i, OFFSET * j, OFFSET * k);
-                    cubes.add(cube);
-                }
-            }
-        }
+        //Oscillate the cube back and forth in the x direction
+        double xPos = 15.0 * Math.sin(0.02 * frameCount);
+        cube.translateTo((float)xPos, -1.0f, -10.0f);
     }
 
     @Override
     public void next() {
-        colorBlindnessMode += 1;
-        colorBlindnessMode %= NUM_COLOR_BLINDNESS_MODES;
+        if (akinetopsiaRate == RATE_NORMAL)
+            akinetopsiaRate = RATE_AKINETOPSIA;
+        else
+            akinetopsiaRate = RATE_NORMAL;
     }
 }
