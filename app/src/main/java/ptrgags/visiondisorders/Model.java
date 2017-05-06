@@ -46,7 +46,7 @@ abstract class Model {
         Matrix.scaleM(scaleMatrix, 0, x, y, z);
     }
 
-    public void rotate(int angle, float x, float y, float z) {
+    public void rotate(float angle, float x, float y, float z) {
         Matrix.rotateM(rotateMatrix, 0, angle, x, y, z);
     }
 
