@@ -151,6 +151,10 @@ public class Akinetopsia extends Scene {
 
             checkGLError("Render Cube");
         }
+        // Disable the attribute buffers
+        GLES20.glDisableVertexAttribArray(posParam);
+        GLES20.glDisableVertexAttribArray(colorParam);
+        GLES20.glDisableVertexAttribArray(normalParam);
     }
 
     @Override

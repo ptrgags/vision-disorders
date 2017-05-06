@@ -15,6 +15,50 @@ import java.util.Map;
  */
 
 class Hemianopia extends Scene {
+    private static final boolean[] OCCLUDE_NOTHING = new boolean[] {false, false, false, false};
+    private static final boolean[] OCCLUDE_LEFT = new boolean[] {true, true, false, false};
+    private static final boolean[] OCCLUDE_RIGHT = new boolean[] {false, false, true, true};
+    private static final boolean[] OCCLUDE_SUPERIOR_RIGHT = new boolean[] {false, false, false, true};
+    private static final boolean[] OCCLUDE_INFERIOR_LEFT = new boolean[] {true, false, false, false};
+
+    private static final int NUM_MODES = 7;
+
+    //Left eye occlusion in the various modes
+    private static final boolean[][] OCCLUSION_LEFT_EYE = new boolean[][] {
+            //Normal mode
+            OCCLUDE_NOTHING,
+            //Left homonymous,
+            OCCLUDE_LEFT,
+            //Right homonymous,
+            OCCLUDE_RIGHT,
+            //Binasal
+            OCCLUDE_RIGHT,
+            //Bitemporal
+            OCCLUDE_LEFT,
+            //superior right
+            OCCLUDE_SUPERIOR_RIGHT,
+            //Inferior leftt
+            OCCLUDE_INFERIOR_LEFT
+    };
+
+    //right eye occlusion in the various modes
+    private static final boolean[][] OCCLUSION_RIGHT_EYE = new boolean[][] {
+            //Normal mode
+            OCCLUDE_NOTHING,
+            //Left homonymous,
+            OCCLUDE_LEFT,
+            //Right homonymous,
+            OCCLUDE_RIGHT,
+            //Binasal
+            OCCLUDE_LEFT,
+            //Bitemporal
+            OCCLUDE_RIGHT,
+            //superior right
+            OCCLUDE_SUPERIOR_RIGHT,
+            //Inferior leftt
+            OCCLUDE_INFERIOR_LEFT
+    };
+
     //How many blocks in each direction.
     private static final int BLOCK_RADIUS = 9;
     // maximum allowed amplitude for the wave
@@ -24,17 +68,44 @@ class Hemianopia extends Scene {
 
     private Camera camera;
     private List<Model> blocks = new ArrayList<>();
+    private List<Model> occluders = new ArrayList<>();
     private ShaderProgram blockProgram;
     private int frameCount = 0;
+    private int hemianopiaMode = 0;
 
     @Override
     public void initScene() {
         buildBlocks();
+        buildOccluders();
 
         camera = new Camera();
         camera.setPosition(0.0f, 0.0f, 0.1f);
         camera.setTarget(0.0f, 0.0f, 0.0f);
         camera.setUp(0.0f, 1.0f, 0.0f);
+    }
+
+    private void buildOccluders() {
+        final float[] OFFSETS = new float[] {-0.5f, 0.5f};
+        final float[] BLACK = new float[] {0, 0, 0, 1};
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 2; j++) {
+                Model occluder = new Plane(BLACK);
+
+                //Scale the occluder
+                occluder.scale(0.5f, 1, 0.5f);
+
+                //Position it
+                float x = OFFSETS[i];
+                float y = OFFSETS[j];
+                occluder.translate(x, y, 0);
+
+                //Rotate it so it's facing the camera
+                occluder.rotate(90, 1, 0, 0);
+
+                //Add it to the list
+                occluders.add(occluder);
+            }
+        }
     }
 
     private float wave(float x, float y, float time) {
@@ -137,6 +208,53 @@ class Hemianopia extends Scene {
 
             checkGLError("Render Cube");
         }
+
+        float[] orthoProjection = new float[16];
+        Matrix.orthoM(orthoProjection, 0, -1, 1, -1, 1, 0.1f, -3);
+
+        //Update the matrices for ortho
+        GLES20.glUniformMatrix4fv(
+                blockProgram.getUniform("projection"), 1, false, orthoProjection, 0);
+        GLES20.glUniformMatrix4fv(
+                blockProgram.getUniform("view"), 1, false, cameraView, 0);
+
+        // Since all the cubes have the same vertices and normals, only load
+        // them into the shader once
+        Model firstOccluder = occluders.get(0);
+        FloatBuffer occCoords = firstBlock.getModelCoords();
+        GLES20.glVertexAttribPointer(
+                posParam, 4, GLES20.GL_FLOAT, false, 0, occCoords);
+        FloatBuffer occNormals = firstBlock.getModelNormals();
+        GLES20.glVertexAttribPointer(
+                normalParam, 3, GLES20.GL_FLOAT, false, 0, occNormals);
+
+        boolean[][] occluderFlags = (eye.getType() == Eye.Type.LEFT) ? OCCLUSION_LEFT_EYE : OCCLUSION_RIGHT_EYE;
+        boolean[] modeFlags = occluderFlags[hemianopiaMode];
+
+        // Render each Occluder. Only the color and position needs to change.
+        for (int i = 0; i < occluders.size(); i++) {
+            if (!modeFlags[i])
+                continue;
+
+            Model occ = occluders.get(i);
+            float[] model = occ.getModelMatrix();
+            GLES20.glUniformMatrix4fv(modelParam, 1, false, model, 0);
+
+            FloatBuffer modelColors = occ.getModelColors();
+            GLES20.glVertexAttribPointer(
+                    colorParam, 4, GLES20.GL_FLOAT, false, 0, modelColors);
+
+            //TODO: models should have a way to get the number of vertices
+            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6);
+
+            checkGLError("Render Occluder");
+        }
+
+        // Disable the attribute buffers
+        GLES20.glDisableVertexAttribArray(posParam);
+        GLES20.glDisableVertexAttribArray(colorParam);
+        GLES20.glDisableVertexAttribArray(normalParam);
+
     }
 
     @Override
@@ -160,6 +278,18 @@ class Hemianopia extends Scene {
     public void onFrame() {
         frameCount++;
         moveBlocks();
+    }
+
+    @Override
+    public void next() {
+        hemianopiaMode++;
+        hemianopiaMode %= NUM_MODES;
+    }
+
+    @Override
+    public void prev() {
+        hemianopiaMode--;
+        hemianopiaMode %= NUM_MODES;
     }
 
     private void moveBlocks() {
