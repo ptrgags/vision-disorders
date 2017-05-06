@@ -22,7 +22,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 
 public class MainActivity extends GvrActivity implements GvrView.StereoRenderer {
     private List<Scene> scenes = new ArrayList<>();
-    private int selectedScene = 1;
+    private int selectedScene = 2;
 
     /**
      * Init the Google VR view.
@@ -54,6 +54,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         scenes.add(colorblindness);
         Scene akin = new Akinetopsia();
         scenes.add(akin);
+        Scene hemi = new Hemianopia();
+        scenes.add(hemi);
 
         for (Scene scene : scenes)
             scene.initScene();

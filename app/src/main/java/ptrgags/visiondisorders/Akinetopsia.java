@@ -155,6 +155,7 @@ public class Akinetopsia extends Scene {
 
     @Override
     public void initShaders(Map<String, Shader> shaders) {
+        //TODO: Non-colorblind frag shader
         Shader diffuse = shaders.get("vert_diffuse");
         Shader colorblind = shaders.get("frag_colorblind");
         cubeProgram = new ShaderProgram(diffuse, colorblind);

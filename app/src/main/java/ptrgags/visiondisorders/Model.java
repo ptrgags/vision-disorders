@@ -22,7 +22,7 @@ abstract class Model {
     }
 
     /**
-     * Like Translate, but it resets the translation to the identitty
+     * Like Translate, but it resets the translation to the identity
      * @param x x-coordinate
      * @param y y-coordinate
      * @param z z-coordinate
@@ -40,6 +40,17 @@ abstract class Model {
      */
     public void translate(float dx, float dy, float dz) {
         Matrix.translateM(translateMatrix, 0, dx, dy, dz);
+    }
+
+    /**
+     * Like Translate, but it resets the translation to the identity
+     * @param x x-coordinate
+     * @param y y-coordinate
+     * @param z z-coordinate
+     */
+    public void scaleTo(float x, float y, float z) {
+        Matrix.setIdentityM(scaleMatrix, 0);
+        Matrix.scaleM(scaleMatrix, 0, x, y, z);
     }
 
     public void scale(float x, float y, float z) {
