@@ -34,6 +34,11 @@ public class Akinetopsia extends Scene {
     private static final float DISTANCE = 10.0f;
     // distance from thee origin to the center of each block in the xz-plane
     private static final float RADIUS = DISTANCE + HALF_THICKNESS;
+    /** Position of the light in world space */
+    private static final float[] LIGHT_POS = new float[] {
+            // close to the right wall and a little bit above the origin
+            DISTANCE - 3.0f, 3.0f, 0, 0
+    };
 
     private Camera camera;
     private ShaderProgram cubeProgram;
@@ -41,8 +46,6 @@ public class Akinetopsia extends Scene {
     //how many frames to wait before the next frame is drawn
     private int akinetopsiaRate = RATE_NORMAL;
     private List<Model> blocks = new ArrayList<>();
-
-
 
     @Override
     public void initScene() {
@@ -112,9 +115,13 @@ public class Akinetopsia extends Scene {
                 cubeProgram.getUniform("projection"), 1, false, projection, 0);
         GLES20.glUniformMatrix4fv(
                 cubeProgram.getUniform("view"), 1, false, view, 0);
-        //TODO: Remove me
-        GLES20.glUniform1i(
-                cubeProgram.getUniform("colorblind_mode"), 0);
+
+        //Get the light position in view space
+        float[] light_pos = new float[4];
+        Matrix.multiplyMV(light_pos, 0, view, 0, LIGHT_POS, 0);
+
+        GLES20.glUniform3fv(
+                cubeProgram.getUniform("light_pos"), 1, light_pos, 0);
 
         int modelParam = cubeProgram.getUniform("model");
         int posParam = cubeProgram.getAttribute("position");
@@ -159,15 +166,14 @@ public class Akinetopsia extends Scene {
 
     @Override
     public void initShaders(Map<String, Shader> shaders) {
-        //TODO: Non-colorblind frag shader
-        Shader diffuse = shaders.get("vert_diffuse");
-        Shader colorblind = shaders.get("frag_colorblind");
-        cubeProgram = new ShaderProgram(diffuse, colorblind);
+        Shader lighting = shaders.get("vert_lighting");
+        Shader lambert = shaders.get("frag_lambert");
+        cubeProgram = new ShaderProgram(lighting, lambert);
         checkGLError("Plane program");
         cubeProgram.addUniform("model");
         cubeProgram.addUniform("view");
         cubeProgram.addUniform("projection");
-        cubeProgram.addUniform("colorblind_mode");
+        cubeProgram.addUniform("light_pos");
         cubeProgram.addAttribute("position");
         cubeProgram.addAttribute("color");
         cubeProgram.addAttribute("normal");

@@ -12,7 +12,6 @@ import com.google.vr.sdk.base.GvrView;
 import com.google.vr.sdk.base.HeadTransform;
 import com.google.vr.sdk.base.Viewport;
 
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -96,14 +95,21 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         Map<String, Shader> shaders = new HashMap<>();
 
         // Create shaders
+        //TODO: Remove old shaders
         Shader diffuse = new Shader(
                 GLES20.GL_VERTEX_SHADER, R.raw.diffuse, this);
         Shader colorblindness = new Shader(
                 GLES20.GL_FRAGMENT_SHADER, R.raw.color_blindness, this);
+        Shader lighting = new Shader(
+                GLES20.GL_VERTEX_SHADER, R.raw.lighting, this);
+        Shader lambert = new Shader(
+                GLES20.GL_FRAGMENT_SHADER, R.raw.lambert, this);
 
         // Store the shaders in a hash map
         shaders.put("vert_diffuse", diffuse);
         shaders.put("frag_colorblind", colorblindness);
+        shaders.put("vert_lighting", lighting);
+        shaders.put("frag_lambert", lambert);
 
         return shaders;
     }
