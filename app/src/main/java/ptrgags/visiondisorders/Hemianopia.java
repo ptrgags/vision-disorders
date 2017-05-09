@@ -66,6 +66,11 @@ class Hemianopia extends Scene {
     // Distance between two blocks (center to center)
     private static final float BLOCK_OFFSET = 2.0f;
 
+    // Light position in world space
+    private static final float[] LIGHT_POS = new float[] {
+            2.0f, 2.0f, 0.0f, 0.0f
+    };
+
     private Camera camera;
     private List<Model> blocks = new ArrayList<>();
     private List<Model> occluders = new ArrayList<>();
@@ -170,9 +175,13 @@ class Hemianopia extends Scene {
                 blockProgram.getUniform("projection"), 1, false, projection, 0);
         GLES20.glUniformMatrix4fv(
                 blockProgram.getUniform("view"), 1, false, view, 0);
-        //TODO: Remove me
-        GLES20.glUniform1i(
-                blockProgram.getUniform("colorblind_mode"), 0);
+
+        //Get the light position in view space
+        float[] light_pos = new float[4];
+        Matrix.multiplyMV(light_pos, 0, view, 0, LIGHT_POS, 0);
+
+        GLES20.glUniform3fv(
+                blockProgram.getUniform("light_pos"), 1, light_pos, 0);
 
         int modelParam = blockProgram.getUniform("model");
         int posParam = blockProgram.getAttribute("position");
@@ -259,15 +268,14 @@ class Hemianopia extends Scene {
 
     @Override
     public void initShaders(Map<String, Shader> shaders) {
-        //TODO: Non-colorblind frag shader
-        Shader diffuse = shaders.get("vert_diffuse");
-        Shader colorblind = shaders.get("frag_colorblind");
-        blockProgram = new ShaderProgram(diffuse, colorblind);
+        Shader vert = shaders.get("vert_lighting");
+        Shader frag = shaders.get("frag_lambert");
+        blockProgram = new ShaderProgram(vert, frag);
         checkGLError("Plane program");
         blockProgram.addUniform("model");
         blockProgram.addUniform("view");
         blockProgram.addUniform("projection");
-        blockProgram.addUniform("colorblind_mode");
+        blockProgram.addUniform("light_pos");
         blockProgram.addAttribute("position");
         blockProgram.addAttribute("color");
         blockProgram.addAttribute("normal");

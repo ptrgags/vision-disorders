@@ -11,7 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 public class Colorblindness extends Scene {
-    private static final int NUM_COLOR_BLINDNESS_MODES = 3;
+    private static final int NUM_COLOR_BLINDNESS_MODES = 9;
+    private static final float[] LIGHT_POS = new float[] {
+            10.0f, 1.0f, 0.0f, 0.0f
+    };
 
     private List<Model> cubes = new ArrayList<>();
     private ShaderProgram cubeProgram;
@@ -52,6 +55,13 @@ public class Colorblindness extends Scene {
                 cubeProgram.getUniform("view"), 1, false, view, 0);
         GLES20.glUniform1i(
                 cubeProgram.getUniform("colorblind_mode"), colorBlindnessMode);
+
+        //Get the light position in view space
+        float[] light_pos = new float[4];
+        Matrix.multiplyMV(light_pos, 0, view, 0, LIGHT_POS, 0);
+
+        GLES20.glUniform3fv(
+                cubeProgram.getUniform("light_pos"), 1, light_pos, 0);
 
         int modelParam = cubeProgram.getUniform("model");
         int posParam = cubeProgram.getAttribute("position");
@@ -96,14 +106,15 @@ public class Colorblindness extends Scene {
 
     @Override
     public void initShaders(Map<String, Shader> shaders) {
-        Shader diffuse = shaders.get("vert_diffuse");
+        Shader vert = shaders.get("vert_lighting");
         Shader colorblind = shaders.get("frag_colorblind");
-        cubeProgram = new ShaderProgram(diffuse, colorblind);
+        cubeProgram = new ShaderProgram(vert, colorblind);
         checkGLError("Plane program");
         cubeProgram.addUniform("model");
         cubeProgram.addUniform("view");
         cubeProgram.addUniform("projection");
         cubeProgram.addUniform("colorblind_mode");
+        cubeProgram.addUniform("light_pos");
         cubeProgram.addAttribute("position");
         cubeProgram.addAttribute("color");
         cubeProgram.addAttribute("normal");

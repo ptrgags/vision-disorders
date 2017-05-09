@@ -21,7 +21,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 
 public class MainActivity extends GvrActivity implements GvrView.StereoRenderer {
     private List<Scene> scenes = new ArrayList<>();
-    private int selectedScene = 2;
+    private int selectedScene = 0;
 
     /**
      * Init the Google VR view.
