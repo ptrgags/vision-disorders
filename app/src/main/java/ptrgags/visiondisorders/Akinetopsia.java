@@ -224,4 +224,9 @@ public class Akinetopsia extends Scene {
         else
             akinetopsiaRate = RATE_NORMAL;
     }
+
+    public void prev() {
+        //It's just toggling things so this works
+        next();
+    }
 }

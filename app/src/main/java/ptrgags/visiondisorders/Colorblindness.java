@@ -149,7 +149,16 @@ public class Colorblindness extends Scene {
 
     @Override
     public void next() {
-        colorBlindnessMode += 1;
+        colorBlindnessMode++;
         colorBlindnessMode %= NUM_COLOR_BLINDNESS_MODES;
+    }
+
+    public void prev() {
+        colorBlindnessMode--;
+        colorBlindnessMode %= NUM_COLOR_BLINDNESS_MODES;
+
+        // Because Java != Python :(
+        if (colorBlindnessMode < 0)
+            colorBlindnessMode += NUM_COLOR_BLINDNESS_MODES;
     }
 }

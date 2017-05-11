@@ -132,18 +132,47 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-            //Go to the previous scene
-            selectedScene--;
-            selectedScene %= scenes.size();
-            return true;
-        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-            selectedScene++;
-            selectedScene %= scenes.size();
-            return true;
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+            case KeyEvent.KEYCODE_BUTTON_L1:
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+            case KeyEvent.KEYCODE_BUTTON_X:
+                prevScene();
+                break;
+            case KeyEvent.KEYCODE_VOLUME_UP:
+            case KeyEvent.KEYCODE_BUTTON_R1:
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+            case KeyEvent.KEYCODE_BUTTON_B:
+                nextScene();
+                break;
+            case KeyEvent.KEYCODE_BUTTON_Y:
+            case KeyEvent.KEYCODE_DPAD_UP:
+            case KeyEvent.KEYCODE_BUTTON_R2:
+                scenes.get(selectedScene).next();
+                break;
+            case KeyEvent.KEYCODE_BUTTON_A:
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+            case KeyEvent.KEYCODE_BUTTON_L2:
+                scenes.get(selectedScene).prev();
+                break;
+            default:
+                Log.i("Vision Disorders", "User pressed: " + event.toString());
         }
-        else
-            return false;
+        return true;
+    }
+
+    private void nextScene() {
+        selectedScene++;
+        selectedScene %= scenes.size();
+    }
+
+    private void prevScene() {
+        selectedScene--;
+        selectedScene %= scenes.size();
+
+        // I miss Python :(
+        if (selectedScene < 0)
+            selectedScene += scenes.size();
     }
 }

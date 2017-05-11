@@ -298,6 +298,8 @@ class Hemianopia extends Scene {
     public void prev() {
         hemianopiaMode--;
         hemianopiaMode %= NUM_MODES;
+        if (hemianopiaMode < 0)
+            hemianopiaMode += NUM_MODES;
     }
 
     private void moveBlocks() {
