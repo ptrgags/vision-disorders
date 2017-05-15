@@ -1,4 +1,4 @@
-package ptrgags.visiondisorders;
+package ptrgags.visiondisorders.scenes;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import ptrgags.visiondisorders.Camera;
+import ptrgags.visiondisorders.Shader;
+import ptrgags.visiondisorders.ShaderProgram;
 import ptrgags.visiondisorders.models.Cube;
 import ptrgags.visiondisorders.models.Model;
 

@@ -1,4 +1,4 @@
-package ptrgags.visiondisorders;
+package ptrgags.visiondisorders.rvm;
 
 import android.opengl.Matrix;
 

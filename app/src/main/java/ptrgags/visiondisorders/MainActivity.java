@@ -19,6 +19,12 @@ import java.util.Map;
 
 import javax.microedition.khronos.egl.EGLConfig;
 
+import ptrgags.visiondisorders.scenes.Akinetopsia;
+import ptrgags.visiondisorders.scenes.Colorblindness;
+import ptrgags.visiondisorders.scenes.Hemianopia;
+import ptrgags.visiondisorders.scenes.ReversalOfVision;
+import ptrgags.visiondisorders.scenes.Scene;
+
 public class MainActivity extends GvrActivity implements GvrView.StereoRenderer {
     private List<Scene> scenes = new ArrayList<>();
     private int selectedScene = 0;

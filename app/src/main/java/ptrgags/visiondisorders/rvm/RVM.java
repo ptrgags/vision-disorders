@@ -1,4 +1,4 @@
-package ptrgags.visiondisorders;
+package ptrgags.visiondisorders.rvm;
 
 import com.google.vr.sdk.base.Eye;
 

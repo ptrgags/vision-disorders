@@ -1,4 +1,4 @@
-package ptrgags.visiondisorders;
+package ptrgags.visiondisorders.scenes;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
@@ -6,10 +6,19 @@ import android.opengl.Matrix;
 import com.google.vr.sdk.base.Eye;
 
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import ptrgags.visiondisorders.Camera;
+import ptrgags.visiondisorders.Shader;
+import ptrgags.visiondisorders.ShaderProgram;
+import ptrgags.visiondisorders.Texture;
 import ptrgags.visiondisorders.models.Model;
 import ptrgags.visiondisorders.models.Skybox;
+import ptrgags.visiondisorders.rvm.CoronalRVM;
+import ptrgags.visiondisorders.rvm.EyeRVM;
+import ptrgags.visiondisorders.rvm.RVM;
 
 /**
  * Created by Peter on 5/11/2017.
@@ -20,16 +29,22 @@ public class ReversalOfVision extends Scene {
     private ShaderProgram skyboxProgram;
     private Model skybox;
     private Texture skyboxTex;
+    private List<RVM> modes = new ArrayList<>();
+    private int rvmMode = 0;
 
     @Override
     public void initScene() {
         skybox = new Skybox();
-        skybox.scale(20.0f, 20.0f, 20.0f);
+        skybox.scale(50.0f, 50.0f, 50.0f);
 
         camera = new Camera();
         camera.setPosition(0.0f, 0.0f, 0.1f);
         camera.setTarget(0.0f, 0.0f, 0.0f);
         camera.setUp(0.0f, 1.0f, 0.0f);
+
+        // Add the modes
+        modes.add(new CoronalRVM(0));
+        modes.add(new CoronalRVM(180));
     }
 
     @Override
@@ -41,13 +56,17 @@ public class ReversalOfVision extends Scene {
         checkGLError("Color settings");
 
         //Get the projection matrix
-        float[] projection = eye.getPerspective(10.0f, 40.0f);
+        float[] projection = eye.getPerspective(25.0f, 100.0f);
 
         //Calculate the view matrix
         float[] cameraView = camera.getViewMatrix();
+        /*
         float[] eyeView = eye.getEyeView();
         float[] view = new float[16];
         Matrix.multiplyMM(view, 0, eyeView, 0, cameraView, 0);
+        */
+        float[] view = modes.get(rvmMode).rotateView(cameraView, eye);
+
 
         skyboxProgram.use();
         GLES20.glUniformMatrix4fv(
@@ -111,5 +130,19 @@ public class ReversalOfVision extends Scene {
     @Override
     public void initTextures(Map<String, Texture> textures) {
         skyboxTex = textures.get("city_skybox");
+    }
+
+    @Override
+    public void next() {
+        rvmMode++;
+        rvmMode %= modes.size();
+    }
+
+    @Override
+    public void prev() {
+        rvmMode--;
+        rvmMode %= modes.size();
+        if (rvmMode < 0)
+            rvmMode += modes.size();
     }
 }

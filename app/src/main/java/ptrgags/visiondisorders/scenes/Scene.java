@@ -1,4 +1,4 @@
-package ptrgags.visiondisorders;
+package ptrgags.visiondisorders.scenes;
 
 import android.opengl.GLES20;
 import android.util.Log;
@@ -6,6 +6,9 @@ import android.util.Log;
 import com.google.vr.sdk.base.Eye;
 
 import java.util.Map;
+
+import ptrgags.visiondisorders.Shader;
+import ptrgags.visiondisorders.Texture;
 
 /**
  * A scene manages the models and
