@@ -10,7 +10,7 @@ import com.google.vr.sdk.base.Eye;
  * For example, one patient had the left visual field rotated at 45 degrees
  * and the other eye had vision flipped upside-down
  */
-class EyeRVM implements RVM {
+public class EyeRVM implements RVM {
     /** angle of rotation for the left eye CCW in degrees */
     private float leftAngle;
     /** angle of rotation for the right eye CCW in degrees */

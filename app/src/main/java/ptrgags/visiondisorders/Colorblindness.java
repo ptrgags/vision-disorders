@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import ptrgags.visiondisorders.models.Cube;
+import ptrgags.visiondisorders.models.Model;
+
 public class Colorblindness extends Scene {
     private static final int NUM_COLOR_BLINDNESS_MODES = 9;
     private static final float[] LIGHT_POS = new float[] {

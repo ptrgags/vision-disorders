@@ -7,9 +7,11 @@ import com.google.vr.sdk.base.Eye;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+
+import ptrgags.visiondisorders.models.Cube;
+import ptrgags.visiondisorders.models.Model;
 
 /**
  * Created by Peter on 5/5/2017.

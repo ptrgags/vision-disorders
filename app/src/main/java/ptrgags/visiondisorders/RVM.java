@@ -8,7 +8,7 @@ import com.google.vr.sdk.base.Eye;
  * can be done one of a couple different ways depending on the desired
  * effect. So this is a strategy pattern to handle the view mattrix calculation
  */
-interface RVM {
+public interface RVM {
     /**
      * Given the camera view and the Eye object, calculate the
      * view matrix.

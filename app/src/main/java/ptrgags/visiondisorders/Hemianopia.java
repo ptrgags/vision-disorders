@@ -10,11 +10,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import ptrgags.visiondisorders.models.Cube;
+import ptrgags.visiondisorders.models.Model;
+import ptrgags.visiondisorders.models.Plane;
+
 /**
  * Created by Peter on 5/6/2017.
  */
 
-class Hemianopia extends Scene {
+public class Hemianopia extends Scene {
     private static final boolean[] OCCLUDE_NOTHING = new boolean[] {false, false, false, false};
     private static final boolean[] OCCLUDE_LEFT = new boolean[] {true, true, false, false};
     private static final boolean[] OCCLUDE_RIGHT = new boolean[] {false, false, true, true};

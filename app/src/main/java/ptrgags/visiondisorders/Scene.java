@@ -29,6 +29,8 @@ public abstract class Scene {
      */
     public abstract void initShaders(Map<String, Shader> shaders);
 
+    public void initTextures(Map<String, Texture> textures){}
+
     public static void checkGLError(String label) {
         int error = GLES20.glGetError();
         if (error != GLES20.GL_NO_ERROR) {

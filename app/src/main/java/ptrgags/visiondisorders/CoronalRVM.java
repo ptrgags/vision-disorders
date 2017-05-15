@@ -9,7 +9,7 @@ import com.google.vr.sdk.base.Eye;
  * RVM rotates the whole scene so that the right eye is viewing
  * an upside-down left field of vision and vice-versa.
  */
-class CoronalRVM implements RVM {
+public class CoronalRVM implements RVM {
     /**
      * Angle of rotation (CCW in degrees) of the view
      */

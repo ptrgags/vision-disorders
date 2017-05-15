@@ -1,4 +1,4 @@
-package ptrgags.visiondisorders;
+package ptrgags.visiondisorders.models;
 
 import java.nio.FloatBuffer;
 
@@ -6,7 +6,7 @@ import java.nio.FloatBuffer;
  * Created by Peter on 4/23/2017.
  */
 
-class Cube extends Model {
+public class Cube extends Model {
     private static final float[] CUBE_COORDS = new float[] {
             //Top face
             -1, 1, -1, 1,
@@ -139,5 +139,10 @@ class Cube extends Model {
     @Override
     public FloatBuffer getModelNormals() {
         return makeVertexBuffer(CUBE_NORMALS);
+    }
+
+    @Override
+    public FloatBuffer getUVCoords() {
+        return null;
     }
 }

@@ -1,4 +1,4 @@
-package ptrgags.visiondisorders;
+package ptrgags.visiondisorders.models;
 
 import android.opengl.Matrix;
 
@@ -6,11 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-/**
- * Created by Peter on 4/20/2017.
- */
-
-abstract class Model {
+public abstract class Model {
     private float[] rotateMatrix = new float[16];
     private float[] translateMatrix = new float[16];
     private float[] scaleMatrix = new float[16];
@@ -75,6 +71,8 @@ abstract class Model {
     public abstract FloatBuffer getModelColors();
 
     public abstract FloatBuffer getModelNormals();
+
+    public abstract FloatBuffer getUVCoords();
 
     public static FloatBuffer makeVertexBuffer(float[] vertices) {
         ByteBuffer bytebuffer = ByteBuffer.allocateDirect(vertices.length * 4);

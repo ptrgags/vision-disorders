@@ -55,6 +55,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         scenes.add(akin);
         Scene hemi = new Hemianopia();
         scenes.add(hemi);
+        Scene rev = new ReversalOfVision();
+        scenes.add(rev);
 
         for (Scene scene : scenes)
             scene.initScene();
@@ -86,8 +88,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         //Also create the shaders
         Map<String, Shader> shaders = makeShaders();
-        for (Scene scene : scenes)
+        Map<String, Texture> textures = makeTextures();
+        for (Scene scene : scenes) {
             scene.initShaders(shaders);
+            scene.initTextures(textures);
+        }
     }
 
     private Map<String,Shader> makeShaders() {
@@ -104,14 +109,28 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 GLES20.GL_VERTEX_SHADER, R.raw.lighting, this);
         Shader lambert = new Shader(
                 GLES20.GL_FRAGMENT_SHADER, R.raw.lambert, this);
+        Shader skyboxVert = new Shader(
+                GLES20.GL_VERTEX_SHADER, R.raw.skybox_vert, this);
+        Shader skyboxFrag = new Shader(
+                GLES20.GL_FRAGMENT_SHADER, R.raw.skybox_frag, this);
 
         // Store the shaders in a hash map
         shaders.put("vert_diffuse", diffuse);
         shaders.put("frag_colorblind", colorblindness);
         shaders.put("vert_lighting", lighting);
         shaders.put("frag_lambert", lambert);
+        shaders.put("vert_skybox", skyboxVert);
+        shaders.put("frag_skybox", skyboxFrag);
 
         return shaders;
+    }
+
+    private Map<String, Texture> makeTextures() {
+        Texture citySkybox = new Texture(this, R.drawable.skybox_city);
+
+        Map<String, Texture> textures = new HashMap<>();
+        textures.put("city_skybox", citySkybox);
+        return textures;
     }
 
     @Override

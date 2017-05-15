@@ -1,4 +1,4 @@
-package ptrgags.visiondisorders;
+package ptrgags.visiondisorders.models;
 
 import java.nio.FloatBuffer;
 
@@ -61,5 +61,10 @@ public class Plane extends Model {
     @Override
     public FloatBuffer getModelNormals() {
         return makeVertexBuffer(PLANE_NORMALS);
+    }
+
+    @Override
+    public FloatBuffer getUVCoords() {
+        return null;
     }
 }

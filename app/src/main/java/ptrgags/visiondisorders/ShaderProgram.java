@@ -10,7 +10,7 @@ import java.util.Map;
  * Created by Peter on 4/20/2017.
  */
 
-class ShaderProgram {
+public class ShaderProgram {
     private int programHandle = -1;
     // Map of shader variable name -> param id
     private Map<String, Integer> uniforms = new HashMap<>();
