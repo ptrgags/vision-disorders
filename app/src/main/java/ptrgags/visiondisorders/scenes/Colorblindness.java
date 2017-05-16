@@ -17,7 +17,7 @@ import ptrgags.visiondisorders.models.Cube;
 import ptrgags.visiondisorders.models.Model;
 
 public class Colorblindness extends Scene {
-    private static final int NUM_COLOR_BLINDNESS_MODES = 9;
+    private static final int NUM_COLOR_BLINDNESS_MODES = 5;
     private static final float[] LIGHT_POS = new float[] {
             10.0f, 1.0f, 0.0f, 0.0f
     };

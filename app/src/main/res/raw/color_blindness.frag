@@ -18,14 +18,17 @@ uniform int colorblind_mode;
 
 /** Color modes */
 const int MODE_NORMAL = 0;
-const int MODE_PROTANOMALY = 1;
-const int MODE_PROTANOPIA = 2;
-const int MODE_DEUTERANOMALY = 3;
-const int MODE_DEUTERANOPIA = 4;
-const int MODE_TRITANOMALY = 5;
-const int MODE_TRITANOPIA = 6;
-const int MODE_ACHROMATOMALY = 7;
-const int MODE_ACHROMATOPSIA = 8;
+const int MODE_PROTANOPIA = 1;
+const int MODE_DEUTERANOPIA = 2;
+const int MODE_TRITANOPIA = 3;
+const int MODE_ACHROMATOPSIA = 4;
+
+//These ones didn't look so great so I'm excluding them in my demo but
+//leaving them in the shader for posterity.
+const int MODE_PROTANOMALY = 5;
+const int MODE_DEUTERANOMALY = 6;
+const int MODE_TRITANOMALY = 7;
+const int MODE_ACHROMATOMALY = 8;
 
 //Colorblind matrices ====================================
 //These are translated from the JavaScript code from:
