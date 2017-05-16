@@ -24,6 +24,7 @@ import ptrgags.visiondisorders.scenes.Colorblindness;
 import ptrgags.visiondisorders.scenes.Hemianopia;
 import ptrgags.visiondisorders.scenes.ReversalOfVision;
 import ptrgags.visiondisorders.scenes.Scene;
+import ptrgags.visiondisorders.scenes.Tetrachromacy;
 
 public class MainActivity extends GvrActivity implements GvrView.StereoRenderer {
     private List<Scene> scenes = new ArrayList<>();
@@ -61,8 +62,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         scenes.add(akin);
         Scene hemi = new Hemianopia();
         scenes.add(hemi);
-        Scene rev = new ReversalOfVision();
-        scenes.add(rev);
+        Scene tetra = new Tetrachromacy();
+        scenes.add(tetra);
 
         for (Scene scene : scenes)
             scene.initScene();
@@ -119,6 +120,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 GLES20.GL_VERTEX_SHADER, R.raw.skybox_vert, this);
         Shader skyboxFrag = new Shader(
                 GLES20.GL_FRAGMENT_SHADER, R.raw.skybox_frag, this);
+        Shader tetraFrag = new Shader(
+                GLES20.GL_FRAGMENT_SHADER, R.raw.tetrachrome_frag, this);
 
         // Store the shaders in a hash map
         shaders.put("vert_diffuse", diffuse);
@@ -127,15 +130,18 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         shaders.put("frag_lambert", lambert);
         shaders.put("vert_skybox", skyboxVert);
         shaders.put("frag_skybox", skyboxFrag);
+        shaders.put("frag_tetrachrome", tetraFrag);
 
         return shaders;
     }
 
     private Map<String, Texture> makeTextures() {
         Texture citySkybox = new Texture(this, R.drawable.skybox_city);
+        Texture colorful = new Texture(this, R.drawable.colorful);
 
         Map<String, Texture> textures = new HashMap<>();
         textures.put("city_skybox", citySkybox);
+        textures.put("colorful", colorful);
         return textures;
     }
 
