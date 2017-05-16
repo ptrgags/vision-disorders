@@ -187,6 +187,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             case KeyEvent.KEYCODE_BUTTON_L2:
                 scenes.get(selectedScene).prev();
                 break;
+            case KeyEvent.KEYCODE_BUTTON_START:
+                scenes.get(selectedScene).reset();
             default:
                 Log.i("Vision Disorders", "User pressed: " + event.toString());
         }
@@ -196,6 +198,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private void nextScene() {
         selectedScene++;
         selectedScene %= scenes.size();
+
+        scenes.get(selectedScene).reset();
     }
 
     private void prevScene() {
@@ -205,5 +209,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // I miss Python :(
         if (selectedScene < 0)
             selectedScene += scenes.size();
+
+        scenes.get(selectedScene).reset();
     }
 }

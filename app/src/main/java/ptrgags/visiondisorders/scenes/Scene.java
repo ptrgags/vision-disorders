@@ -53,5 +53,10 @@ public abstract class Scene {
      */
     public void prev() {}
 
+    /**
+     * Reset scene.
+     */
+    public void reset() {}
+
     public void onFrame() {}
 }

@@ -309,6 +309,11 @@ public class Hemianopia extends Scene {
             hemianopiaMode += NUM_MODES;
     }
 
+    @Override
+    public void reset() {
+        hemianopiaMode = 0;
+    }
+
     private void moveBlocks() {
         final int BLOCKS_PER_ROW = 2 * BLOCK_RADIUS + 1;
         for (int i = -BLOCK_RADIUS; i <= BLOCK_RADIUS; i++) {

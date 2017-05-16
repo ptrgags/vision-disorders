@@ -167,4 +167,9 @@ public class Colorblindness extends Scene {
         if (colorBlindnessMode < 0)
             colorBlindnessMode += NUM_COLOR_BLINDNESS_MODES;
     }
+
+    @Override
+    public void reset() {
+        colorBlindnessMode = 0;
+    }
 }

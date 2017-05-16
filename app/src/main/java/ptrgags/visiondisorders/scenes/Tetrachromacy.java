@@ -141,4 +141,9 @@ public class Tetrachromacy extends Scene {
         if (mode < 0)
             mode += MODE_COLORS.length;
     }
+
+    @Override
+    public void reset() {
+        mode = 0;
+    }
 }

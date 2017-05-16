@@ -145,4 +145,9 @@ public class ReversalOfVision extends Scene {
         if (rvmMode < 0)
             rvmMode += modes.size();
     }
+
+    @Override
+    public void reset() {
+        rvmMode = 0;
+    }
 }

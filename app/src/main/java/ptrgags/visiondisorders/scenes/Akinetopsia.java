@@ -234,4 +234,9 @@ public class Akinetopsia extends Scene {
         //It's just toggling things so this works
         next();
     }
+
+    @Override
+    public void reset() {
+        akinetopsiaRate = RATE_NORMAL;
+    }
 }
