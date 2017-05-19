@@ -29,6 +29,18 @@ public class Plane extends Model {
             0, 1, 0
     };
 
+    private static final float[] PLANE_UV = new float[] {
+            //First Triangle
+            0, 1,
+            0, 0,
+            1, 1,
+
+            // Second triangle
+            0, 0,
+            1, 0,
+            1, 1,
+    };
+
     private static final int NUM_VERTICES = 6;
     private static final float[] DEFAULT_COLOR = new float[]{1, 1, 1, 1};
 
@@ -65,6 +77,6 @@ public class Plane extends Model {
 
     @Override
     public FloatBuffer getUVCoords() {
-        return null;
+        return makeVertexBuffer(PLANE_UV);
     }
 }
