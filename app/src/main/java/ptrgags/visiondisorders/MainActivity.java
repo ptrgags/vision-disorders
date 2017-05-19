@@ -38,6 +38,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     // Plane for rendering the mode indicator.
     private Model indicatorPlane;
 
+    // Set this to true to show the indicators.
+    private boolean indicatorsVisible = true;
+
     /**
      * Init the Google VR view.
      */
@@ -89,8 +92,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     public void onDrawEye(Eye eye) {
         scenes.get(selectedScene).onDraw(eye);
 
-        //if (eye.getType() == Eye.Type.LEFT
-        drawIndicators();
+        if (indicatorsVisible)
+            drawIndicators();
     }
 
     private void drawIndicators() {
@@ -129,9 +132,11 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         //TODO: Set these dynamically
         GLES20.glUniform1i(
-                indicatorProgram.getUniform("num_variations"), 3);
+                indicatorProgram.getUniform("num_variations"),
+                scenes.get(selectedScene).getNumModes());
         GLES20.glUniform1i(
-                indicatorProgram.getUniform("selected_variation"), 0);
+                indicatorProgram.getUniform("selected_variation"),
+                scenes.get(selectedScene).getMode());
 
         // Set the attributes
         int posParam = indicatorProgram.getAttribute("position");
@@ -296,6 +301,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 break;
             case KeyEvent.KEYCODE_BUTTON_START:
                 scenes.get(selectedScene).reset();
+            case KeyEvent.KEYCODE_BUTTON_SELECT:
+                indicatorsVisible = !indicatorsVisible;
             default:
                 Log.i("Vision Disorders", "User pressed: " + event.toString());
         }

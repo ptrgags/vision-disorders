@@ -24,7 +24,6 @@ public class Colorblindness extends Scene {
 
     private List<Model> cubes = new ArrayList<>();
     private ShaderProgram cubeProgram;
-    private int colorBlindnessMode = 0;
     private Camera camera;
 
     @Override
@@ -60,7 +59,7 @@ public class Colorblindness extends Scene {
         GLES20.glUniformMatrix4fv(
                 cubeProgram.getUniform("view"), 1, false, view, 0);
         GLES20.glUniform1i(
-                cubeProgram.getUniform("colorblind_mode"), colorBlindnessMode);
+                cubeProgram.getUniform("colorblind_mode"), mode);
 
         //Get the light position in view space
         float[] light_pos = new float[4];
@@ -154,22 +153,7 @@ public class Colorblindness extends Scene {
     }
 
     @Override
-    public void next() {
-        colorBlindnessMode++;
-        colorBlindnessMode %= NUM_COLOR_BLINDNESS_MODES;
-    }
-
-    public void prev() {
-        colorBlindnessMode--;
-        colorBlindnessMode %= NUM_COLOR_BLINDNESS_MODES;
-
-        // Because Java != Python :(
-        if (colorBlindnessMode < 0)
-            colorBlindnessMode += NUM_COLOR_BLINDNESS_MODES;
-    }
-
-    @Override
-    public void reset() {
-        colorBlindnessMode = 0;
+    public int getNumModes() {
+        return NUM_COLOR_BLINDNESS_MODES;
     }
 }

@@ -14,6 +14,9 @@ import ptrgags.visiondisorders.Texture;
  * A scene manages the models and
  */
 public abstract class Scene {
+    // Mode number;
+    protected int mode;
+
     /**
      * Create Models and Camera(s)
      */
@@ -46,17 +49,37 @@ public abstract class Scene {
     /**
      * Show the next version of the current simulation
      */
-    public void next() {}
+    public void next() {
+        mode++;
+        mode %= getNumModes();
+    }
 
     /**
      * Show the previous version of the current simulation
      */
-    public void prev() {}
+    public void prev() {
+        mode--;
+        mode %= getNumModes();
+        if (mode < 0)
+            mode += getNumModes();
+    }
 
     /**
      * Reset scene.
      */
-    public void reset() {}
+    public void reset() {
+        mode = 0;
+    }
 
     public void onFrame() {}
+
+    /**
+     * Get the number of variations of this simulation
+     * @return the number of simulation modes.
+     */
+    public abstract int getNumModes();
+
+    public int getMode() {
+        return mode;
+    }
 }

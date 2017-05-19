@@ -25,7 +25,6 @@ public class Tetrachromacy extends Scene {
         256.0f // Tetrachromacy: Much more color differentiation
     };
 
-    private int mode = 0;
     private Camera camera;
     private ShaderProgram skyboxProgram;
     private Model skybox;
@@ -129,21 +128,7 @@ public class Tetrachromacy extends Scene {
     }
 
     @Override
-    public void next() {
-        mode++;
-        mode %= MODE_COLORS.length;
-    }
-
-    @Override
-    public void prev() {
-        mode--;
-        mode %= MODE_COLORS.length;
-        if (mode < 0)
-            mode += MODE_COLORS.length;
-    }
-
-    @Override
-    public void reset() {
-        mode = 0;
+    public int getNumModes() {
+        return MODE_COLORS.length;
     }
 }

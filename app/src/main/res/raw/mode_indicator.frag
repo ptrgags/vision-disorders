@@ -21,8 +21,8 @@ const float CIRCLE_RADIUS = 0.02;
 const float CIRCLE_SEP = 0.1;
 
 // Colors for the indicator circles and the selected circles.
-const vec4 COLOR_SELECTED = vec4(1.0, 0.5, 0.5, 0.75);
-const vec4 COLOR_CIRCLE = vec4(1.0, 1.0, 1.0, 0.5);
+const vec4 COLOR_SELECTED = vec4(1.0, 0.5, 0.5, 0.5);
+const vec4 COLOR_CIRCLE = vec4(1.0, 1.0, 1.0, 0.25);
 
 /**
  * Draw circles for an indicator bar.

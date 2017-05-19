@@ -30,7 +30,6 @@ public class ReversalOfVision extends Scene {
     private Model skybox;
     private Texture skyboxTex;
     private List<RVM> modes = new ArrayList<>();
-    private int rvmMode = 0;
 
     @Override
     public void initScene() {
@@ -65,7 +64,7 @@ public class ReversalOfVision extends Scene {
         float[] view = new float[16];
         Matrix.multiplyMM(view, 0, eyeView, 0, cameraView, 0);
         */
-        float[] view = modes.get(rvmMode).rotateView(cameraView, eye);
+        float[] view = modes.get(mode).rotateView(cameraView, eye);
 
 
         skyboxProgram.use();
@@ -133,21 +132,7 @@ public class ReversalOfVision extends Scene {
     }
 
     @Override
-    public void next() {
-        rvmMode++;
-        rvmMode %= modes.size();
-    }
-
-    @Override
-    public void prev() {
-        rvmMode--;
-        rvmMode %= modes.size();
-        if (rvmMode < 0)
-            rvmMode += modes.size();
-    }
-
-    @Override
-    public void reset() {
-        rvmMode = 0;
+    public int getNumModes() {
+        return modes.size();
     }
 }

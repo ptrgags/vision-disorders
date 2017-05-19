@@ -83,7 +83,6 @@ public class Hemianopia extends Scene {
     private List<Model> occluders = new ArrayList<>();
     private ShaderProgram blockProgram;
     private int frameCount = 0;
-    private int hemianopiaMode = 0;
 
     @Override
     public void initScene() {
@@ -245,7 +244,7 @@ public class Hemianopia extends Scene {
                 normalParam, 3, GLES20.GL_FLOAT, false, 0, occNormals);
 
         boolean[][] occluderFlags = (eye.getType() == Eye.Type.LEFT) ? OCCLUSION_LEFT_EYE : OCCLUSION_RIGHT_EYE;
-        boolean[] modeFlags = occluderFlags[hemianopiaMode];
+        boolean[] modeFlags = occluderFlags[mode];
 
         // Render each Occluder. Only the color and position needs to change.
         for (int i = 0; i < occluders.size(); i++) {
@@ -296,22 +295,8 @@ public class Hemianopia extends Scene {
     }
 
     @Override
-    public void next() {
-        hemianopiaMode++;
-        hemianopiaMode %= NUM_MODES;
-    }
-
-    @Override
-    public void prev() {
-        hemianopiaMode--;
-        hemianopiaMode %= NUM_MODES;
-        if (hemianopiaMode < 0)
-            hemianopiaMode += NUM_MODES;
-    }
-
-    @Override
-    public void reset() {
-        hemianopiaMode = 0;
+    public int getNumModes() {
+        return NUM_MODES;
     }
 
     private void moveBlocks() {

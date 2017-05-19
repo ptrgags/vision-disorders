@@ -25,6 +25,11 @@ public class Akinetopsia extends Scene {
     private static final int RATE_NORMAL = 1;
     /** Akinetopsia. Only refresh when frameCount is divisible by this number */
     private static final int RATE_AKINETOPSIA = 120;
+    //Lookup table for modes
+    private static final int[] RATES = new int[] {
+            RATE_NORMAL,
+            RATE_AKINETOPSIA
+    };
     /** Number of layers of blocks. there are four blocks per layer */
     private static final int NUM_LAYERS = 10;
     // y value of the bottom layer
@@ -48,14 +53,11 @@ public class Akinetopsia extends Scene {
     private Camera camera;
     private ShaderProgram cubeProgram;
     private long frameCount = 0;
-    //how many frames to wait before the next frame is drawn
-    private int akinetopsiaRate = RATE_NORMAL;
     private List<Model> blocks = new ArrayList<>();
 
     @Override
     public void initScene() {
         makeBlocks();
-        float[] cubeColor = new float[] {0.0f, 0.5f, 1.0f, 1.0f};
 
         camera = new Camera();
         camera.setPosition(0.0f, 0.0f, 0.1f);
@@ -97,7 +99,7 @@ public class Akinetopsia extends Scene {
     @Override
     public void onDraw(Eye eye) {
         // This skips rendering frames when in akinetopsia mode
-        if (frameCount % akinetopsiaRate != 0)
+        if (frameCount % RATES[mode] != 0)
             return;
 
         //Set drawing bits.
@@ -191,6 +193,11 @@ public class Akinetopsia extends Scene {
         rotateBlocks();
     }
 
+    @Override
+    public int getNumModes() {
+        return RATES.length;
+    }
+
     private void rotateBlocks() {
         final int BLOCKS_PER_LAYER = 4;
         // How many degrees/frame a layer rotates. Must be a factor of 90
@@ -220,23 +227,5 @@ public class Akinetopsia extends Scene {
                 block.translateTo(x, y, z);
             }
         }
-    }
-
-    @Override
-    public void next() {
-        if (akinetopsiaRate == RATE_NORMAL)
-            akinetopsiaRate = RATE_AKINETOPSIA;
-        else
-            akinetopsiaRate = RATE_NORMAL;
-    }
-
-    public void prev() {
-        //It's just toggling things so this works
-        next();
-    }
-
-    @Override
-    public void reset() {
-        akinetopsiaRate = RATE_NORMAL;
     }
 }
