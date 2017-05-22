@@ -39,7 +39,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private Model indicatorPlane;
 
     // Set this to true to show the indicators.
-    private boolean indicatorsVisible = true;
+    private boolean indicatorsVisible = false;
 
     /**
      * Init the Google VR view.

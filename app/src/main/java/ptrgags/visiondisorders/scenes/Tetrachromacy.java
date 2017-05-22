@@ -28,7 +28,7 @@ public class Tetrachromacy extends Scene {
     private Camera camera;
     private ShaderProgram skyboxProgram;
     private Model skybox;
-    private Texture skyboxTex;
+    private float time = 0;
 
     @Override
     public void initScene() {
@@ -84,17 +84,13 @@ public class Tetrachromacy extends Scene {
         //Set the number of colors
         GLES20.glUniform1f(
                 skyboxProgram.getUniform("num_colors"), MODE_COLORS[mode]);
+        //Set the current time
+        GLES20.glUniform1f(
+                skyboxProgram.getUniform("time"), time);
 
         // load the model matrix into the GPU
         float[] model = skybox.getModelMatrix();
         GLES20.glUniformMatrix4fv(modelParam, 1, false, model, 0);
-
-        //Load the texture
-        int texParam = skyboxProgram.getUniform("texture");
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, skyboxTex.getTexHandle());
-        GLES20.glUniform1i(texParam, 0);
-
 
         //TODO: models should have a way to get the number of vertices
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 36);
@@ -108,27 +104,27 @@ public class Tetrachromacy extends Scene {
 
     @Override
     public void initShaders(Map<String, Shader> shaders) {
-        Shader vert = shaders.get("vert_skybox");
+        Shader vert = shaders.get("vert_uv");
         Shader frag = shaders.get("frag_tetrachrome");
         skyboxProgram = new ShaderProgram(vert, frag);
         checkGLError("Plane program");
         skyboxProgram.addUniform("model");
         skyboxProgram.addUniform("view");
         skyboxProgram.addUniform("projection");
-        skyboxProgram.addUniform("texture");
         skyboxProgram.addUniform("num_colors");
+        skyboxProgram.addUniform("time");
         skyboxProgram.addAttribute("position");
         skyboxProgram.addAttribute("uv");
         checkGLError("Program Params");
     }
 
     @Override
-    public void initTextures(Map<String, Texture> textures) {
-        skyboxTex = textures.get("colorful");
+    public int getNumModes() {
+        return MODE_COLORS.length;
     }
 
     @Override
-    public int getNumModes() {
-        return MODE_COLORS.length;
+    public void onFrame() {
+        time += 0.02;
     }
 }
