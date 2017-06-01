@@ -49,10 +49,10 @@ button in each category
 |-----------|--------|
 | D-Pad Right, B Button, R1 Button, Volume Up  | Go to next simulation |
 | D-Pad Left, X Button, L1 Button, Volume Down | Go to previous simulation |
-| D-Pad Up, Y Button, R2 Button                | Next variation |
+| D-Pad Up, Y Button, R2 Button, Cardboard Trigger | Next variation |
 | D-Pad Down, A Button, L2 Button              | Previous variation |
 | Start Button | Reset current simulation to the first variation |
-| Select Button |
+| Select Button | toggle mode/variation indicators |
 
 ## Simulations
 
