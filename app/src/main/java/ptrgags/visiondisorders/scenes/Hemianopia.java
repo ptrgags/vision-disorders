@@ -146,7 +146,7 @@ public class Hemianopia extends Scene {
                 // half the height since the cube goes from -1 to 1 instead
                 // of 0 to 1 in each direction
                 float y_scale = wave(i, j, 0) / 2.0f;
-                block.scale(1, (float) Math.abs(y_scale), 1);
+                block.scale(1, Math.abs(y_scale), 1);
 
                 //Translate the block to the place in the grid. adjust the
                 //height so the bottom of the blocks line up at the bottom.
@@ -309,7 +309,7 @@ public class Hemianopia extends Scene {
 
                 // Update the scale
                 float y_scale = wave(i, j, frameCount) / 2.0f;
-                block.scaleTo(1, (float) Math.abs(y_scale), 1);
+                block.scaleTo(1, Math.abs(y_scale), 1);
 
                 // Update the position.
                 float y_pos = y_scale / 2.0f - MAX_AMPLITUDE - 1.0f;

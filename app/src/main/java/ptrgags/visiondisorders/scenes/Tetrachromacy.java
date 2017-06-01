@@ -11,7 +11,6 @@ import java.util.Map;
 import ptrgags.visiondisorders.Camera;
 import ptrgags.visiondisorders.Shader;
 import ptrgags.visiondisorders.ShaderProgram;
-import ptrgags.visiondisorders.Texture;
 import ptrgags.visiondisorders.models.Model;
 import ptrgags.visiondisorders.models.Skybox;
 

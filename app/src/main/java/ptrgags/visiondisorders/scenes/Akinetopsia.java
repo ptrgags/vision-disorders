@@ -206,7 +206,6 @@ public class Akinetopsia extends Scene {
                 1, 2, 3, 5, 6, 9, 10, 15, 18, 30, 45
         };
         final int QUARTER_TAU_DEGREES = 90;
-        final int TAU_DEGREES = 360;
 
         for (int i = 0; i < NUM_LAYERS; i++) {
             for (int j = 0; j < BLOCKS_PER_LAYER; j++) {

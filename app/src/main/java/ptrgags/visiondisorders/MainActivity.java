@@ -25,7 +25,6 @@ import ptrgags.visiondisorders.models.Plane;
 import ptrgags.visiondisorders.scenes.Akinetopsia;
 import ptrgags.visiondisorders.scenes.Colorblindness;
 import ptrgags.visiondisorders.scenes.Hemianopia;
-import ptrgags.visiondisorders.scenes.ReversalOfVision;
 import ptrgags.visiondisorders.scenes.Scene;
 import ptrgags.visiondisorders.scenes.Tetrachromacy;
 
@@ -213,9 +212,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         Map<String, Shader> shaders = new HashMap<>();
 
         // Create shaders
-        //TODO: Remove old shaders
-        Shader diffuse = new Shader(
-                GLES20.GL_VERTEX_SHADER, R.raw.diffuse, this);
         Shader colorblindness = new Shader(
                 GLES20.GL_FRAGMENT_SHADER, R.raw.color_blindness, this);
         Shader lighting = new Shader(
@@ -234,7 +230,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 GLES20.GL_FRAGMENT_SHADER, R.raw.mode_indicator, this);
 
         // Store the shaders in a hash map
-        shaders.put("vert_diffuse", diffuse);
         shaders.put("frag_colorblind", colorblindness);
         shaders.put("vert_lighting", lighting);
         shaders.put("frag_lambert", lambert);

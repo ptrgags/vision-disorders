@@ -1,7 +1,6 @@
 package ptrgags.visiondisorders.scenes;
 
 import android.opengl.GLES20;
-import android.opengl.Matrix;
 
 import com.google.vr.sdk.base.Eye;
 
@@ -17,7 +16,6 @@ import ptrgags.visiondisorders.Texture;
 import ptrgags.visiondisorders.models.Model;
 import ptrgags.visiondisorders.models.Skybox;
 import ptrgags.visiondisorders.rvm.CoronalRVM;
-import ptrgags.visiondisorders.rvm.EyeRVM;
 import ptrgags.visiondisorders.rvm.RVM;
 
 /**
