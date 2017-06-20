@@ -1,6 +1,5 @@
 package ptrgags.visiondisorders.scenes;
 
-import android.opengl.GLES20;
 import android.opengl.Matrix;
 
 import com.google.vr.sdk.base.Eye;
@@ -58,22 +57,15 @@ public class Tetrachromacy extends Scene {
         skyboxProgram.setUniformMatrix("projection", projection);
         skyboxProgram.setUniformMatrix("view", view);
 
-        int posParam = skyboxProgram.getAttribute("position");
-        int uvParam = skyboxProgram.getAttribute("uv");
-
         //Enable all the attribute buffers
-        //TODO: Simplify this
-        GLES20.glEnableVertexAttribArray(posParam);
-        GLES20.glEnableVertexAttribArray(uvParam);
+        skyboxProgram.enableAttribute("position");
+        skyboxProgram.enableAttribute("uv");
 
         //Set the parameters
         FloatBuffer modelCoords = skybox.getModelCoords();
-        //TODO: Simplify this
-        GLES20.glVertexAttribPointer(
-                posParam, 4, GLES20.GL_FLOAT, false, 0, modelCoords);
+        skyboxProgram.setAttribute("position", modelCoords, 4);
         FloatBuffer modelUV = skybox.getUVCoords();
-        GLES20.glVertexAttribPointer(
-                uvParam, 2, GLES20.GL_FLOAT, false, 0, modelUV);
+        skyboxProgram.setAttribute("uv", modelUV, 2);
 
         //Set the number of colors
         skyboxProgram.setUniform("num_colors", MODE_COLORS[mode]);
@@ -84,14 +76,12 @@ public class Tetrachromacy extends Scene {
         skyboxProgram.setUniformMatrix("model", model);
 
         //TODO: models should have a way to get the number of vertices
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 36);
+        skyboxProgram.draw(36);
 
-        checkGLError("Render Cube");
+        checkGLError("Render Skybox");
 
         // Disable the attribute buffers
-        //TODO: Simplify this
-        GLES20.glDisableVertexAttribArray(posParam);
-        GLES20.glDisableVertexAttribArray(uvParam);
+        skyboxProgram.disableAttributes();
     }
 
     @Override
@@ -100,9 +90,6 @@ public class Tetrachromacy extends Scene {
         Shader frag = shaders.get("frag_tetrachrome");
         skyboxProgram = new ShaderProgram(vert, frag);
         checkGLError("Plane program");
-        skyboxProgram.addAttribute("position");
-        skyboxProgram.addAttribute("uv");
-        checkGLError("Program Params");
     }
 
     @Override

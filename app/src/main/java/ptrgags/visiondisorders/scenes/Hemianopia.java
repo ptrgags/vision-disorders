@@ -1,6 +1,5 @@
 package ptrgags.visiondisorders.scenes;
 
-import android.opengl.GLES20;
 import android.opengl.Matrix;
 
 import com.google.vr.sdk.base.Eye;
@@ -22,11 +21,16 @@ import ptrgags.visiondisorders.models.Plane;
  */
 
 public class Hemianopia extends Scene {
-    private static final boolean[] OCCLUDE_NOTHING = new boolean[] {false, false, false, false};
-    private static final boolean[] OCCLUDE_LEFT = new boolean[] {true, true, false, false};
-    private static final boolean[] OCCLUDE_RIGHT = new boolean[] {false, false, true, true};
-    private static final boolean[] OCCLUDE_SUPERIOR_RIGHT = new boolean[] {false, false, false, true};
-    private static final boolean[] OCCLUDE_INFERIOR_LEFT = new boolean[] {true, false, false, false};
+    private static final boolean[] OCCLUDE_NOTHING = new boolean[] {
+            false, false, false, false};
+    private static final boolean[] OCCLUDE_LEFT = new boolean[] {
+            true, true, false, false};
+    private static final boolean[] OCCLUDE_RIGHT = new boolean[] {
+            false, false, true, true};
+    private static final boolean[] OCCLUDE_SUPERIOR_RIGHT = new boolean[] {
+            false, false, false, true};
+    private static final boolean[] OCCLUDE_INFERIOR_LEFT = new boolean[] {
+            true, false, false, false};
 
     private static final int NUM_MODES = 7;
 
@@ -181,42 +185,33 @@ public class Hemianopia extends Scene {
         Matrix.multiplyMV(light_pos, 0, view, 0, LIGHT_POS, 0);
         blockProgram.setUniformVector("light_pos", light_pos);
 
-        //TODO: remove this
-        int posParam = blockProgram.getAttribute("position");
-        int colorParam = blockProgram.getAttribute("color");
-        int normalParam = blockProgram.getAttribute("normal");
-
         //Enable all the attribute buffers
-        //TODO: Simplify this
-        GLES20.glEnableVertexAttribArray(posParam);
-        GLES20.glEnableVertexAttribArray(colorParam);
-        GLES20.glEnableVertexAttribArray(normalParam);
+        blockProgram.enableAttribute("position");
+        blockProgram.enableAttribute("color");
+        blockProgram.enableAttribute("normal");
 
         // Since all the cubes have the same vertices and normals, only load
         // them into the shader once
         Model firstBlock = blocks.get(0);
         FloatBuffer modelCoords = firstBlock.getModelCoords();
-        //TODO: Simplify this
-        GLES20.glVertexAttribPointer(
-                posParam, 4, GLES20.GL_FLOAT, false, 0, modelCoords);
+        blockProgram.setAttribute("position", modelCoords, 4);
         FloatBuffer modelNormals = firstBlock.getModelNormals();
-        GLES20.glVertexAttribPointer(
-                normalParam, 3, GLES20.GL_FLOAT, false, 0, modelNormals);
+        blockProgram.setAttribute("normal", modelNormals, 3);
 
         //TODO: Split into two functions, one for blocks, one for occluders
 
         // Render each cube. Only the color and position needs to change.
         for (Model block : blocks) {
+            // Set the model matrix
             float[] model = block.getModelMatrix();
             blockProgram.setUniformMatrix("model", model);
 
+            // Set the vertex colors
             FloatBuffer modelColors = block.getModelColors();
-            //TODO: Simplify this
-            GLES20.glVertexAttribPointer(
-                    colorParam, 4, GLES20.GL_FLOAT, false, 0, modelColors);
+            blockProgram.setAttribute("color", modelColors, 4);
 
             //TODO: models should have a way to get the number of vertices
-            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 36);
+            blockProgram.draw(36);
 
             checkGLError("Render Cube");
         }
@@ -231,15 +226,12 @@ public class Hemianopia extends Scene {
 
         // Since all the cubes have the same vertices and normals, only load
         // them into the shader once
-        //TODO: Simplify this
         FloatBuffer occCoords = firstBlock.getModelCoords();
-        GLES20.glVertexAttribPointer(
-                posParam, 4, GLES20.GL_FLOAT, false, 0, occCoords);
+        blockProgram.setAttribute("position", occCoords, 4);
         FloatBuffer occNormals = firstBlock.getModelNormals();
-        GLES20.glVertexAttribPointer(
-                normalParam, 3, GLES20.GL_FLOAT, false, 0, occNormals);
+        blockProgram.setAttribute("normal", occNormals, 3);
 
-        //TODO: Move to function?
+        //TODO: Move to function
         boolean[][] occluderFlags;
         if (eye.getType() == Eye.Type.LEFT)
             occluderFlags = OCCLUSION_LEFT_EYE;
@@ -249,6 +241,7 @@ public class Hemianopia extends Scene {
 
         // Render each Occluder. Only the color and position needs to change.
         for (int i = 0; i < occluders.size(); i++) {
+            // Check if we should render this occluder
             if (!modeFlags[i])
                 continue;
 
@@ -257,21 +250,16 @@ public class Hemianopia extends Scene {
             blockProgram.setUniformMatrix("model", model);
 
             FloatBuffer modelColors = occ.getModelColors();
-            //TODO: Simplify me
-            GLES20.glVertexAttribPointer(
-                    colorParam, 4, GLES20.GL_FLOAT, false, 0, modelColors);
+            blockProgram.setAttribute("color", modelColors, 4);
 
             //TODO: models should have a way to get the number of vertices
-            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6);
+            blockProgram.draw(6);
 
             checkGLError("Render Occluder");
         }
 
         // Disable the attribute buffers
-        //TODO: Simplify me
-        GLES20.glDisableVertexAttribArray(posParam);
-        GLES20.glDisableVertexAttribArray(colorParam);
-        GLES20.glDisableVertexAttribArray(normalParam);
+        blockProgram.disableAttributes();
 
     }
 
@@ -281,10 +269,6 @@ public class Hemianopia extends Scene {
         Shader frag = shaders.get("frag_lambert");
         blockProgram = new ShaderProgram(vert, frag);
         checkGLError("Plane program");
-        blockProgram.addAttribute("position");
-        blockProgram.addAttribute("color");
-        blockProgram.addAttribute("normal");
-        checkGLError("Program Params");
     }
 
     @Override

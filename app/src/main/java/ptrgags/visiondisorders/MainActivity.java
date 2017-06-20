@@ -13,6 +13,7 @@ import com.google.vr.sdk.base.GvrView;
 import com.google.vr.sdk.base.HeadTransform;
 import com.google.vr.sdk.base.Viewport;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -130,28 +131,21 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         indicatorProgram.setUniform(
                 "selected_variation", selectedScene.getMode());
 
+        // Enable attribute buffers
+        indicatorProgram.enableAttribute("position");
+        indicatorProgram.enableAttribute("uv");
 
         // Set the attributes
-        //TODO: Simplify me
-        int posParam = indicatorProgram.getAttribute("position");
-        int uvParam = indicatorProgram.getAttribute("uv");
-        GLES20.glVertexAttribPointer(
-                posParam, 4, GLES20.GL_FLOAT, false, 0,
-                indicatorPlane.getModelCoords());
-        GLES20.glVertexAttribPointer(
-                uvParam, 2, GLES20.GL_FLOAT, false, 0,
-                indicatorPlane.getUVCoords());
-
-        //TODO: Simplify me
-        GLES20.glEnableVertexAttribArray(posParam);
-        GLES20.glEnableVertexAttribArray(uvParam);
+        FloatBuffer modelCoords = indicatorPlane.getModelCoords();
+        indicatorProgram.setAttribute("position", modelCoords, 4);
+        FloatBuffer uvCoords = indicatorPlane.getUVCoords();
+        indicatorProgram.setAttribute("uv", uvCoords, 2);
 
         //TODO: Get the number of vertices dynamically
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6);
+        indicatorProgram.draw(6);
 
-        //TODO: Simplify me
-        GLES20.glDisableVertexAttribArray(posParam);
-        GLES20.glDisableVertexAttribArray(uvParam);
+        // Disable the attribute buffers
+        indicatorProgram.disableAttributes();
 
         // Turn off blending.
         GLES20.glDisable(GLES20.GL_BLEND);
@@ -184,9 +178,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         Shader frag = shaders.get("frag_indicator");
         indicatorProgram = new ShaderProgram(vert, frag);
         checkGLError("Plane program");
-        indicatorProgram.addAttribute("position");
-        indicatorProgram.addAttribute("uv");
-        checkGLError("Program Params");
 
         camera = new Camera();
         camera.setPosition(0.0f, 0.0f, 0.1f);
