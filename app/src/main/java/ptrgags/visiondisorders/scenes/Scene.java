@@ -23,10 +23,17 @@ public abstract class Scene {
     public abstract void initScene();
 
     /**
-     * Draw event
+     * Draw event. This should be overriden in subclasses with a call
+     * to super.onDraw() somewhere at the beginning.
      * @param eye the eye to assist with computation.
      */
-    public abstract void onDraw(Eye eye);
+    public void onDraw(Eye eye) {
+        //Set drawing bits.
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        GLES20.glEnable(GLES20.GL_CULL_FACE);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        checkGLError("Color settings");
+    };
 
     /**
      * Initialize ShaderPrograms. The Shader objects are preallocated in

@@ -28,22 +28,49 @@ public class ShaderProgram {
         GLES20.glAttachShader(program, frag.getShaderHandle());
         GLES20.glLinkProgram(program);
 
-        //Use this program so we can check for errors in the main app.
-        //use();
-
         //Return the program handle
         return program;
     }
 
     /**
-     * Specify a uniform variable present in the vertex/fragment shader
-     * and add it to the internal map. this way we only have to do the
-     * lookup once. Later lookups are done with getUniform()
-     * @param name the name of the variable
+     * Attach a 4x4 float matrix to the shader program. This is the only type
+     * of matrix used in the program.
+     * @param name the variable name in the shader
+     * @param matrix the matrix values
      */
-    public void addUniform(String name) {
-        int param = GLES20.glGetUniformLocation(programHandle, name);
-        uniforms.put(name, param);
+    public void setUniformMatrix(String name, float[] matrix) {
+        int varId = getUniform(name);
+        GLES20.glUniformMatrix4fv(varId, 1, false, matrix, 0);
+    }
+
+    /**
+     * Attach a 3-component float vector to the shader program.
+     * @param name the variablee name
+     * @param vector the components
+     */
+    public void setUniformVector(String name, float[] vector) {
+        int varId = getUniform(name);
+        GLES20.glUniform3fv(varId, 1, vector, 0);
+    }
+
+    /**
+     * Attach a float to the shader program.
+     * @param name The variable name in the shader
+     * @param val the value of the variable
+     */
+    public void setUniform(String name, float val) {
+        int varId = getUniform(name);
+        GLES20.glUniform1f(varId, val);
+    }
+
+    /**
+     * Attach an integer to the shader program
+     * @param name the variable name
+     * @param val the value of the variable
+     */
+    public void setUniform(String name, int val) {
+        int varId = getUniform(name);
+        GLES20.glUniform1i(varId, val);
     }
 
     /**
@@ -57,8 +84,23 @@ public class ShaderProgram {
         attributes.put(name, param);
     }
 
+    /**
+     * Get the location of the uniform variable in the shader program.
+     * This is cached in a hashmap so glGetUniformLocation() is only
+     * called the first time this function is callled.
+     * @param name the name of the uniform variable in the shader
+     * @return the location of the uniform variable.
+     */
     public int getUniform(String name) {
-        return uniforms.get(name);
+        if (uniforms.containsKey(name))
+            // Return the cached location
+            return uniforms.get(name);
+        else {
+            // Fetch the location, cache it and return it.
+            int param = GLES20.glGetUniformLocation(programHandle, name);
+            uniforms.put(name, param);
+            return param;
+        }
     }
 
     public int getAttribute(String name) {

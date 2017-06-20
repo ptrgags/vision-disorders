@@ -161,11 +161,7 @@ public class Hemianopia extends Scene {
 
     @Override
     public void onDraw(Eye eye) {
-        //Set drawing bits.
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        GLES20.glEnable(GLES20.GL_CULL_FACE);
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        checkGLError("Color settings");
+        super.onDraw(eye);
 
         //Get the projection matrix
         float[] projection = eye.getPerspective(0.9f, 100.0f);
@@ -177,24 +173,21 @@ public class Hemianopia extends Scene {
         Matrix.multiplyMM(view, 0, eyeView, 0, cameraView, 0);
 
         blockProgram.use();
-        GLES20.glUniformMatrix4fv(
-                blockProgram.getUniform("projection"), 1, false, projection, 0);
-        GLES20.glUniformMatrix4fv(
-                blockProgram.getUniform("view"), 1, false, view, 0);
+        blockProgram.setUniformMatrix("projection", projection);
+        blockProgram.setUniformMatrix("view", view);
 
         //Get the light position in view space
         float[] light_pos = new float[4];
         Matrix.multiplyMV(light_pos, 0, view, 0, LIGHT_POS, 0);
+        blockProgram.setUniformVector("light_pos", light_pos);
 
-        GLES20.glUniform3fv(
-                blockProgram.getUniform("light_pos"), 1, light_pos, 0);
-
-        int modelParam = blockProgram.getUniform("model");
+        //TODO: remove this
         int posParam = blockProgram.getAttribute("position");
         int colorParam = blockProgram.getAttribute("color");
         int normalParam = blockProgram.getAttribute("normal");
 
         //Enable all the attribute buffers
+        //TODO: Simplify this
         GLES20.glEnableVertexAttribArray(posParam);
         GLES20.glEnableVertexAttribArray(colorParam);
         GLES20.glEnableVertexAttribArray(normalParam);
@@ -203,18 +196,22 @@ public class Hemianopia extends Scene {
         // them into the shader once
         Model firstBlock = blocks.get(0);
         FloatBuffer modelCoords = firstBlock.getModelCoords();
+        //TODO: Simplify this
         GLES20.glVertexAttribPointer(
                 posParam, 4, GLES20.GL_FLOAT, false, 0, modelCoords);
         FloatBuffer modelNormals = firstBlock.getModelNormals();
         GLES20.glVertexAttribPointer(
                 normalParam, 3, GLES20.GL_FLOAT, false, 0, modelNormals);
 
+        //TODO: Split into two functions, one for blocks, one for occluders
+
         // Render each cube. Only the color and position needs to change.
         for (Model block : blocks) {
             float[] model = block.getModelMatrix();
-            GLES20.glUniformMatrix4fv(modelParam, 1, false, model, 0);
+            blockProgram.setUniformMatrix("model", model);
 
             FloatBuffer modelColors = block.getModelColors();
+            //TODO: Simplify this
             GLES20.glVertexAttribPointer(
                     colorParam, 4, GLES20.GL_FLOAT, false, 0, modelColors);
 
@@ -224,18 +221,17 @@ public class Hemianopia extends Scene {
             checkGLError("Render Cube");
         }
 
+        // The occluders are rendered in orthographic projection
         float[] orthoProjection = new float[16];
         Matrix.orthoM(orthoProjection, 0, -1, 1, -1, 1, 0.1f, -3);
 
         //Update the matrices for ortho
-        GLES20.glUniformMatrix4fv(
-                blockProgram.getUniform("projection"), 1, false, orthoProjection, 0);
-        GLES20.glUniformMatrix4fv(
-                blockProgram.getUniform("view"), 1, false, cameraView, 0);
+        blockProgram.setUniformMatrix("projection", orthoProjection);
+        blockProgram.setUniformMatrix("view", cameraView);
 
         // Since all the cubes have the same vertices and normals, only load
         // them into the shader once
-        Model firstOccluder = occluders.get(0);
+        //TODO: Simplify this
         FloatBuffer occCoords = firstBlock.getModelCoords();
         GLES20.glVertexAttribPointer(
                 posParam, 4, GLES20.GL_FLOAT, false, 0, occCoords);
@@ -243,7 +239,12 @@ public class Hemianopia extends Scene {
         GLES20.glVertexAttribPointer(
                 normalParam, 3, GLES20.GL_FLOAT, false, 0, occNormals);
 
-        boolean[][] occluderFlags = (eye.getType() == Eye.Type.LEFT) ? OCCLUSION_LEFT_EYE : OCCLUSION_RIGHT_EYE;
+        //TODO: Move to function?
+        boolean[][] occluderFlags;
+        if (eye.getType() == Eye.Type.LEFT)
+            occluderFlags = OCCLUSION_LEFT_EYE;
+        else
+            occluderFlags = OCCLUSION_RIGHT_EYE;
         boolean[] modeFlags = occluderFlags[mode];
 
         // Render each Occluder. Only the color and position needs to change.
@@ -253,9 +254,10 @@ public class Hemianopia extends Scene {
 
             Model occ = occluders.get(i);
             float[] model = occ.getModelMatrix();
-            GLES20.glUniformMatrix4fv(modelParam, 1, false, model, 0);
+            blockProgram.setUniformMatrix("model", model);
 
             FloatBuffer modelColors = occ.getModelColors();
+            //TODO: Simplify me
             GLES20.glVertexAttribPointer(
                     colorParam, 4, GLES20.GL_FLOAT, false, 0, modelColors);
 
@@ -266,6 +268,7 @@ public class Hemianopia extends Scene {
         }
 
         // Disable the attribute buffers
+        //TODO: Simplify me
         GLES20.glDisableVertexAttribArray(posParam);
         GLES20.glDisableVertexAttribArray(colorParam);
         GLES20.glDisableVertexAttribArray(normalParam);
@@ -278,10 +281,6 @@ public class Hemianopia extends Scene {
         Shader frag = shaders.get("frag_lambert");
         blockProgram = new ShaderProgram(vert, frag);
         checkGLError("Plane program");
-        blockProgram.addUniform("model");
-        blockProgram.addUniform("view");
-        blockProgram.addUniform("projection");
-        blockProgram.addUniform("light_pos");
         blockProgram.addAttribute("position");
         blockProgram.addAttribute("color");
         blockProgram.addAttribute("normal");

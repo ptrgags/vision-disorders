@@ -30,7 +30,7 @@ import ptrgags.visiondisorders.scenes.Tetrachromacy;
 
 public class MainActivity extends GvrActivity implements GvrView.StereoRenderer {
     private List<Scene> scenes = new ArrayList<>();
-    private int selectedScene = 0;
+    private int selectedSceneIndex = 0;
     private ShaderProgram indicatorProgram;
     // Camera for the indicator
     private Camera camera;
@@ -84,12 +84,12 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     @Override
     public void onNewFrame(HeadTransform headTransform) {
-        scenes.get(selectedScene).onFrame();
+        scenes.get(selectedSceneIndex).onFrame();
     }
 
     @Override
     public void onDrawEye(Eye eye) {
-        scenes.get(selectedScene).onDraw(eye);
+        scenes.get(selectedSceneIndex).onDraw(eye);
 
         if (indicatorsVisible)
             drawIndicators();
@@ -97,6 +97,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     private void drawIndicators() {
         //Set drawing bits.
+        //TODO: Simplify this?
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         GLES20.glEnable(GLES20.GL_CULL_FACE);
         GLES20.glEnable(GLES20.GL_BLEND);
@@ -113,31 +114,25 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         indicatorProgram.use();
 
         //Set the matrices
-        GLES20.glUniformMatrix4fv(
-                indicatorProgram.getUniform("projection"),
-                1, false, orthoProjection, 0);
-        GLES20.glUniformMatrix4fv(
-                indicatorProgram.getUniform("view"), 1, false, cameraView, 0);
-        GLES20.glUniformMatrix4fv(
-                indicatorProgram.getUniform("model"),
-                1, false, indicatorPlane.getModelMatrix(), 0);
+        indicatorProgram.setUniformMatrix("projection", orthoProjection);
+        indicatorProgram.setUniformMatrix("view", cameraView);
+        float[] model = indicatorPlane.getModelMatrix();
+        indicatorProgram.setUniformMatrix("model", model);
 
-        // Set the simuulation/variation indicators
-        GLES20.glUniform1i(
-                indicatorProgram.getUniform("num_simulations"), scenes.size());
-        GLES20.glUniform1i(
-                indicatorProgram.getUniform("selected_simulation"),
-                selectedScene);
+        // Set the simulation indicators
+        indicatorProgram.setUniform("num_simulations", scenes.size());
+        indicatorProgram.setUniform("selected_simulation", selectedSceneIndex);
 
-        //TODO: Set these dynamically
-        GLES20.glUniform1i(
-                indicatorProgram.getUniform("num_variations"),
-                scenes.get(selectedScene).getNumModes());
-        GLES20.glUniform1i(
-                indicatorProgram.getUniform("selected_variation"),
-                scenes.get(selectedScene).getMode());
+        // Set the scene variation indicators
+        Scene selectedScene = scenes.get(selectedSceneIndex);
+        indicatorProgram.setUniform(
+                "num_variations", selectedScene.getNumModes());
+        indicatorProgram.setUniform(
+                "selected_variation", selectedScene.getMode());
+
 
         // Set the attributes
+        //TODO: Simplify me
         int posParam = indicatorProgram.getAttribute("position");
         int uvParam = indicatorProgram.getAttribute("uv");
         GLES20.glVertexAttribPointer(
@@ -147,11 +142,14 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 uvParam, 2, GLES20.GL_FLOAT, false, 0,
                 indicatorPlane.getUVCoords());
 
+        //TODO: Simplify me
         GLES20.glEnableVertexAttribArray(posParam);
         GLES20.glEnableVertexAttribArray(uvParam);
 
+        //TODO: Get the number of vertices dynamically
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6);
 
+        //TODO: Simplify me
         GLES20.glDisableVertexAttribArray(posParam);
         GLES20.glDisableVertexAttribArray(uvParam);
 
@@ -186,13 +184,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         Shader frag = shaders.get("frag_indicator");
         indicatorProgram = new ShaderProgram(vert, frag);
         checkGLError("Plane program");
-        indicatorProgram.addUniform("model");
-        indicatorProgram.addUniform("view");
-        indicatorProgram.addUniform("projection");
-        indicatorProgram.addUniform("num_simulations");
-        indicatorProgram.addUniform("selected_simulation");
-        indicatorProgram.addUniform("num_variations");
-        indicatorProgram.addUniform("selected_variation");
         indicatorProgram.addAttribute("position");
         indicatorProgram.addAttribute("uv");
         checkGLError("Program Params");
@@ -257,7 +248,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     @Override
     public void onCardboardTrigger() {
-        scenes.get(selectedScene).next();
+        scenes.get(selectedSceneIndex).next();
     }
 
     public static void checkGLError(String label) {
@@ -287,15 +278,15 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             case KeyEvent.KEYCODE_BUTTON_Y:
             case KeyEvent.KEYCODE_DPAD_UP:
             case KeyEvent.KEYCODE_BUTTON_R2:
-                scenes.get(selectedScene).next();
+                scenes.get(selectedSceneIndex).next();
                 break;
             case KeyEvent.KEYCODE_BUTTON_A:
             case KeyEvent.KEYCODE_DPAD_DOWN:
             case KeyEvent.KEYCODE_BUTTON_L2:
-                scenes.get(selectedScene).prev();
+                scenes.get(selectedSceneIndex).prev();
                 break;
             case KeyEvent.KEYCODE_BUTTON_START:
-                scenes.get(selectedScene).reset();
+                scenes.get(selectedSceneIndex).reset();
             case KeyEvent.KEYCODE_BUTTON_SELECT:
                 indicatorsVisible = !indicatorsVisible;
             default:
@@ -305,20 +296,20 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     }
 
     private void nextScene() {
-        selectedScene++;
-        selectedScene %= scenes.size();
+        selectedSceneIndex++;
+        selectedSceneIndex %= scenes.size();
 
-        scenes.get(selectedScene).reset();
+        scenes.get(selectedSceneIndex).reset();
     }
 
     private void prevScene() {
-        selectedScene--;
-        selectedScene %= scenes.size();
+        selectedSceneIndex--;
+        selectedSceneIndex %= scenes.size();
 
         // I miss Python :(
-        if (selectedScene < 0)
-            selectedScene += scenes.size();
+        if (selectedSceneIndex < 0)
+            selectedSceneIndex += scenes.size();
 
-        scenes.get(selectedScene).reset();
+        scenes.get(selectedSceneIndex).reset();
     }
 }

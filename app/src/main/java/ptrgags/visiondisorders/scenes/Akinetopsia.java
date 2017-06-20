@@ -102,11 +102,9 @@ public class Akinetopsia extends Scene {
         if (frameCount % RATES[mode] != 0)
             return;
 
-        //Set drawing bits.
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        GLES20.glEnable(GLES20.GL_CULL_FACE);
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        checkGLError("Color settings");
+        // The super call comes after the frame skip to make sure the screen
+        // is not cleared.
+        super.onDraw(eye);
 
         //Get the projection matrix
         float[] projection = eye.getPerspective(1.0f, 50.0f);
@@ -117,34 +115,32 @@ public class Akinetopsia extends Scene {
         float[] view = new float[16];
         Matrix.multiplyMM(view, 0, eyeView, 0, cameraView, 0);
 
+        // Set the projection and view matricies
         cubeProgram.use();
-        GLES20.glUniformMatrix4fv(
-                cubeProgram.getUniform("projection"), 1, false, projection, 0);
-        GLES20.glUniformMatrix4fv(
-                cubeProgram.getUniform("view"), 1, false, view, 0);
+        cubeProgram.setUniformMatrix("projection", projection);
+        cubeProgram.setUniformMatrix("view", view);
 
         //Get the light position in view space
         float[] light_pos = new float[4];
         Matrix.multiplyMV(light_pos, 0, view, 0, LIGHT_POS, 0);
+        cubeProgram.setUniformVector("light_pos", light_pos);
 
-        GLES20.glUniform3fv(
-                cubeProgram.getUniform("light_pos"), 1, light_pos, 0);
-
-        int modelParam = cubeProgram.getUniform("model");
+        //TODO: Remove me
         int posParam = cubeProgram.getAttribute("position");
         int colorParam = cubeProgram.getAttribute("color");
         int normalParam = cubeProgram.getAttribute("normal");
 
         //Enable all the attribute buffers
+        //TODO: Simplify this
         GLES20.glEnableVertexAttribArray(posParam);
         GLES20.glEnableVertexAttribArray(colorParam);
         GLES20.glEnableVertexAttribArray(normalParam);
-
 
         // Since all the cubes have the same vertices and normals, only load
         // them into the shader once
         Model firstBlock = blocks.get(0);
         FloatBuffer modelCoords = firstBlock.getModelCoords();
+        //TODO: simplify attributes
         GLES20.glVertexAttribPointer(
                 posParam, 4, GLES20.GL_FLOAT, false, 0, modelCoords);
         FloatBuffer modelNormals = firstBlock.getModelNormals();
@@ -152,9 +148,10 @@ public class Akinetopsia extends Scene {
                 normalParam, 3, GLES20.GL_FLOAT, false, 0, modelNormals);
 
         // Render each cube. Only the color and position needs to change.
+        //TODO: simplify attributes
         for (Model block : blocks) {
             float[] model = block.getModelMatrix();
-            GLES20.glUniformMatrix4fv(modelParam, 1, false, model, 0);
+            cubeProgram.setUniformMatrix("model", model);
 
             FloatBuffer modelColors = block.getModelColors();
             GLES20.glVertexAttribPointer(
@@ -166,6 +163,7 @@ public class Akinetopsia extends Scene {
             checkGLError("Render Cube");
         }
         // Disable the attribute buffers
+        //TODO: Simplify this
         GLES20.glDisableVertexAttribArray(posParam);
         GLES20.glDisableVertexAttribArray(colorParam);
         GLES20.glDisableVertexAttribArray(normalParam);
@@ -177,10 +175,6 @@ public class Akinetopsia extends Scene {
         Shader lambert = shaders.get("frag_lambert");
         cubeProgram = new ShaderProgram(lighting, lambert);
         checkGLError("Plane program");
-        cubeProgram.addUniform("model");
-        cubeProgram.addUniform("view");
-        cubeProgram.addUniform("projection");
-        cubeProgram.addUniform("light_pos");
         cubeProgram.addAttribute("position");
         cubeProgram.addAttribute("color");
         cubeProgram.addAttribute("normal");

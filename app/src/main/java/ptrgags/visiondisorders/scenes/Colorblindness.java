@@ -38,11 +38,7 @@ public class Colorblindness extends Scene {
 
     @Override
     public void onDraw(Eye eye) {
-        //Set drawing bits.
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        GLES20.glEnable(GLES20.GL_CULL_FACE);
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        checkGLError("Color settings");
+        super.onDraw(eye);
 
         //Get the projection matrix
         float[] projection = eye.getPerspective(0.1f, 100.0f);
@@ -53,27 +49,24 @@ public class Colorblindness extends Scene {
         float[] view = new float[16];
         Matrix.multiplyMM(view, 0, eyeView, 0, cameraView, 0);
 
+        // Set mattrices and uniforms
         cubeProgram.use();
-        GLES20.glUniformMatrix4fv(
-                cubeProgram.getUniform("projection"), 1, false, projection, 0);
-        GLES20.glUniformMatrix4fv(
-                cubeProgram.getUniform("view"), 1, false, view, 0);
-        GLES20.glUniform1i(
-                cubeProgram.getUniform("colorblind_mode"), mode);
+        cubeProgram.setUniformMatrix("projection", projection);
+        cubeProgram.setUniformMatrix("view", view);
+        cubeProgram.setUniform("colorblind_mode", mode);
 
         //Get the light position in view space
         float[] light_pos = new float[4];
         Matrix.multiplyMV(light_pos, 0, view, 0, LIGHT_POS, 0);
+        cubeProgram.setUniformVector("light_pos", light_pos);
 
-        GLES20.glUniform3fv(
-                cubeProgram.getUniform("light_pos"), 1, light_pos, 0);
-
-        int modelParam = cubeProgram.getUniform("model");
+        //TODO: remove this
         int posParam = cubeProgram.getAttribute("position");
         int colorParam = cubeProgram.getAttribute("color");
         int normalParam = cubeProgram.getAttribute("normal");
 
         //Enable all the attribute buffers
+        //TODO: Simplify this
         GLES20.glEnableVertexAttribArray(posParam);
         GLES20.glEnableVertexAttribArray(colorParam);
         GLES20.glEnableVertexAttribArray(normalParam);
@@ -82,6 +75,7 @@ public class Colorblindness extends Scene {
         // them into the shader once
         Model firstCube = cubes.get(0);
         FloatBuffer modelCoords = firstCube.getModelCoords();
+        //TODO: Simplify this
         GLES20.glVertexAttribPointer(
                 posParam, 4, GLES20.GL_FLOAT, false, 0, modelCoords);
         FloatBuffer modelNormals = firstCube.getModelNormals();
@@ -91,9 +85,10 @@ public class Colorblindness extends Scene {
         // Render each cube. Only the color and position needs to change.
         for (Model m : cubes) {
             float[] model = m.getModelMatrix();
-            GLES20.glUniformMatrix4fv(modelParam, 1, false, model, 0);
+            cubeProgram.setUniformMatrix("model", model);
 
             FloatBuffer modelColors = m.getModelColors();
+            //TODO: Simplify this
             GLES20.glVertexAttribPointer(
                     colorParam, 4, GLES20.GL_FLOAT, false, 0, modelColors);
 
@@ -104,6 +99,7 @@ public class Colorblindness extends Scene {
         }
 
         // Disable the attribute buffers
+        //TODO: Simplify this
         GLES20.glDisableVertexAttribArray(posParam);
         GLES20.glDisableVertexAttribArray(colorParam);
         GLES20.glDisableVertexAttribArray(normalParam);
@@ -115,11 +111,6 @@ public class Colorblindness extends Scene {
         Shader colorblind = shaders.get("frag_colorblind");
         cubeProgram = new ShaderProgram(vert, colorblind);
         checkGLError("Plane program");
-        cubeProgram.addUniform("model");
-        cubeProgram.addUniform("view");
-        cubeProgram.addUniform("projection");
-        cubeProgram.addUniform("colorblind_mode");
-        cubeProgram.addUniform("light_pos");
         cubeProgram.addAttribute("position");
         cubeProgram.addAttribute("color");
         cubeProgram.addAttribute("normal");
