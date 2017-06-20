@@ -86,7 +86,7 @@ public class Hemianopia extends Scene {
     private Camera camera;
     private List<Model> blocks = new ArrayList<>();
     private List<Model> occluders = new ArrayList<>();
-    private ShaderProgram blockProgram;
+    private ShaderProgram program;
     private int frameCount = 0;
 
     @Override
@@ -177,27 +177,27 @@ public class Hemianopia extends Scene {
         float[] view = new float[16];
         Matrix.multiplyMM(view, 0, eyeView, 0, cameraView, 0);
 
-        blockProgram.use();
-        blockProgram.setUniformMatrix("projection", projection);
-        blockProgram.setUniformMatrix("view", view);
+        program.use();
+        program.setUniformMatrix("projection", projection);
+        program.setUniformMatrix("view", view);
 
         //Get the light position in view space
         float[] light_pos = new float[4];
         Matrix.multiplyMV(light_pos, 0, view, 0, LIGHT_POS, 0);
-        blockProgram.setUniformVector("light_pos", light_pos);
+        program.setUniformVector("light_pos", light_pos);
 
         //Enable all the attribute buffers
-        blockProgram.enableAttribute("position");
-        blockProgram.enableAttribute("color");
-        blockProgram.enableAttribute("normal");
+        program.enableAttribute("position");
+        program.enableAttribute("color");
+        program.enableAttribute("normal");
 
         // Since all the cubes have the same vertices and normals, only load
         // them into the shader once
         Model firstBlock = blocks.get(0);
         FloatBuffer modelCoords = firstBlock.getModelCoords();
-        blockProgram.setAttribute("position", modelCoords, 4);
+        program.setAttribute("position", modelCoords, 4);
         FloatBuffer modelNormals = firstBlock.getModelNormals();
-        blockProgram.setAttribute("normal", modelNormals, 3);
+        program.setAttribute("normal", modelNormals, 3);
 
         //TODO: Split into two functions, one for blocks, one for occluders
 
@@ -205,13 +205,13 @@ public class Hemianopia extends Scene {
         for (Model block : blocks) {
             // Set the model matrix
             float[] model = block.getModelMatrix();
-            blockProgram.setUniformMatrix("model", model);
+            program.setUniformMatrix("model", model);
 
             // Set the vertex colors
             FloatBuffer modelColors = block.getModelColors();
-            blockProgram.setAttribute("color", modelColors, 4);
+            program.setAttribute("color", modelColors, 4);
 
-            blockProgram.draw(block.getNumVertices());
+            program.draw(block.getNumVertices());
 
             checkGLError("Render Cube");
         }
@@ -221,15 +221,15 @@ public class Hemianopia extends Scene {
         Matrix.orthoM(orthoProjection, 0, -1, 1, -1, 1, 0.1f, -3);
 
         //Update the matrices for ortho
-        blockProgram.setUniformMatrix("projection", orthoProjection);
-        blockProgram.setUniformMatrix("view", cameraView);
+        program.setUniformMatrix("projection", orthoProjection);
+        program.setUniformMatrix("view", cameraView);
 
         // Since all the cubes have the same vertices and normals, only load
         // them into the shader once
         FloatBuffer occCoords = firstBlock.getModelCoords();
-        blockProgram.setAttribute("position", occCoords, 4);
+        program.setAttribute("position", occCoords, 4);
         FloatBuffer occNormals = firstBlock.getModelNormals();
-        blockProgram.setAttribute("normal", occNormals, 3);
+        program.setAttribute("normal", occNormals, 3);
 
         //TODO: Move to function
         boolean[][] occluderFlags;
@@ -247,18 +247,18 @@ public class Hemianopia extends Scene {
 
             Model occ = occluders.get(i);
             float[] model = occ.getModelMatrix();
-            blockProgram.setUniformMatrix("model", model);
+            program.setUniformMatrix("model", model);
 
             FloatBuffer modelColors = occ.getModelColors();
-            blockProgram.setAttribute("color", modelColors, 4);
+            program.setAttribute("color", modelColors, 4);
 
-            blockProgram.draw(occ.getNumVertices());
+            program.draw(occ.getNumVertices());
 
             checkGLError("Render Occluder");
         }
 
         // Disable the attribute buffers
-        blockProgram.disableAttributes();
+        program.disableAttributes();
 
     }
 
@@ -266,7 +266,7 @@ public class Hemianopia extends Scene {
     public void initShaders(Map<String, Shader> shaders) {
         Shader vert = shaders.get("vert_lighting");
         Shader frag = shaders.get("frag_lambert");
-        blockProgram = new ShaderProgram(vert, frag);
+        program = new ShaderProgram(vert, frag);
         checkGLError("Plane program");
     }
 

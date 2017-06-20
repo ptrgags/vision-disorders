@@ -50,7 +50,7 @@ public class Akinetopsia extends Scene {
     };
 
     private Camera camera;
-    private ShaderProgram cubeProgram;
+    private ShaderProgram program;
     private long frameCount = 0;
     private List<Model> blocks = new ArrayList<>();
 
@@ -115,51 +115,51 @@ public class Akinetopsia extends Scene {
         Matrix.multiplyMM(view, 0, eyeView, 0, cameraView, 0);
 
         // Set the projection and view matricies
-        cubeProgram.use();
-        cubeProgram.setUniformMatrix("projection", projection);
-        cubeProgram.setUniformMatrix("view", view);
+        program.use();
+        program.setUniformMatrix("projection", projection);
+        program.setUniformMatrix("view", view);
 
         //Get the light position in view space
         float[] light_pos = new float[4];
         Matrix.multiplyMV(light_pos, 0, view, 0, LIGHT_POS, 0);
-        cubeProgram.setUniformVector("light_pos", light_pos);
+        program.setUniformVector("light_pos", light_pos);
 
         //Enable all the attribute buffers
-        cubeProgram.enableAttribute("position");
-        cubeProgram.enableAttribute("color");
-        cubeProgram.enableAttribute("normal");
+        program.enableAttribute("position");
+        program.enableAttribute("color");
+        program.enableAttribute("normal");
 
         // Since all the cubes have the same vertices and normals, only load
         // them into the shader once
         Model firstBlock = blocks.get(0);
         FloatBuffer modelCoords = firstBlock.getModelCoords();
-        cubeProgram.setAttribute("position", modelCoords, 4);
+        program.setAttribute("position", modelCoords, 4);
         FloatBuffer modelNormals = firstBlock.getModelNormals();
-        cubeProgram.setAttribute("normal", modelNormals, 3);
+        program.setAttribute("normal", modelNormals, 3);
 
         // Render each cube. Only the color and position needs to change.
         for (Model block : blocks) {
             float[] model = block.getModelMatrix();
-            cubeProgram.setUniformMatrix("model", model);
+            program.setUniformMatrix("model", model);
 
             // Set the vertex colors
             FloatBuffer modelColors = block.getModelColors();
-            cubeProgram.setAttribute("color", modelColors, 4);
+            program.setAttribute("color", modelColors, 4);
 
-            cubeProgram.draw(block.getNumVertices());
+            program.draw(block.getNumVertices());
 
             checkGLError("Render Cube");
         }
 
         // Disable the attribute buffers
-        cubeProgram.disableAttributes();
+        program.disableAttributes();
     }
 
     @Override
     public void initShaders(Map<String, Shader> shaders) {
         Shader lighting = shaders.get("vert_lighting");
         Shader lambert = shaders.get("frag_lambert");
-        cubeProgram = new ShaderProgram(lighting, lambert);
+        program = new ShaderProgram(lighting, lambert);
         checkGLError("Plane program");
     }
 

@@ -203,9 +203,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         // Used in tetrachromacy and mode indicator shaders
         builder.makeShader("vert_uv", R.raw.uv_vert);
 
-        //TODO: Remove me
-        builder.makeShader("vert_skybox", R.raw.skybox_vert);
-
         // Compile the fragment shaders
         //Used in colorblindness simulation
         builder.makeShader("frag_colorblindness", R.raw.colorblindness_frag);
@@ -215,9 +212,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         builder.makeShader("frag_tetrachromacy", R.raw.tetrachromacy_frag);
         // Used in the mode indicator shader
         builder.makeShader("frag_indicator", R.raw.indicator_frag);
-
-        //TODO: Remove me
-        builder.makeShader("frag_skybox", R.raw.skybox_frag);
 
         // Fetch the map of compiled shaders
         return builder.getShaderMap();

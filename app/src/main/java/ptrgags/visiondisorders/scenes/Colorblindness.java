@@ -23,7 +23,7 @@ public class Colorblindness extends Scene {
     };
 
     private List<Model> cubes = new ArrayList<>();
-    private ShaderProgram cubeProgram;
+    private ShaderProgram program;
     private Camera camera;
 
     @Override
@@ -50,53 +50,53 @@ public class Colorblindness extends Scene {
         Matrix.multiplyMM(view, 0, eyeView, 0, cameraView, 0);
 
         // Set matrices and uniforms
-        cubeProgram.use();
-        cubeProgram.setUniformMatrix("projection", projection);
-        cubeProgram.setUniformMatrix("view", view);
-        cubeProgram.setUniform("colorblind_mode", mode);
+        program.use();
+        program.setUniformMatrix("projection", projection);
+        program.setUniformMatrix("view", view);
+        program.setUniform("colorblind_mode", mode);
 
         //Get the light position in view space
         float[] light_pos = new float[4];
         Matrix.multiplyMV(light_pos, 0, view, 0, LIGHT_POS, 0);
-        cubeProgram.setUniformVector("light_pos", light_pos);
+        program.setUniformVector("light_pos", light_pos);
 
         //Enable attribute buffers
-        cubeProgram.enableAttribute("position");
-        cubeProgram.enableAttribute("color");
-        cubeProgram.enableAttribute("normal");
+        program.enableAttribute("position");
+        program.enableAttribute("color");
+        program.enableAttribute("normal");
 
         // Since all the cubes have the same vertices and normals, only load
         // them into the shader once
         Model firstCube = cubes.get(0);
         FloatBuffer modelCoords = firstCube.getModelCoords();
-        cubeProgram.setAttribute("position", modelCoords, 4);
+        program.setAttribute("position", modelCoords, 4);
         FloatBuffer modelNormals = firstCube.getModelNormals();
-        cubeProgram.setAttribute("normal", modelNormals, 3);
+        program.setAttribute("normal", modelNormals, 3);
 
         // Render each cube. Only the color and position needs to change.
         for (Model m : cubes) {
             // Set the model matrix
             float[] model = m.getModelMatrix();
-            cubeProgram.setUniformMatrix("model", model);
+            program.setUniformMatrix("model", model);
 
             // Set the color attribute
             FloatBuffer modelColors = m.getModelColors();
-            cubeProgram.setAttribute("color", modelColors, 4);
+            program.setAttribute("color", modelColors, 4);
 
-            cubeProgram.draw(m.getNumVertices());
+            program.draw(m.getNumVertices());
 
             checkGLError("Render Cube");
         }
 
         // Disable the attribute buffers
-        cubeProgram.disableAttributes();
+        program.disableAttributes();
     }
 
     @Override
     public void initShaders(Map<String, Shader> shaders) {
         Shader vert = shaders.get("vert_lighting");
         Shader colorblind = shaders.get("frag_colorblindness");
-        cubeProgram = new ShaderProgram(vert, colorblind);
+        program = new ShaderProgram(vert, colorblind);
         checkGLError("Plane program");
     }
 

@@ -24,7 +24,7 @@ public class Tetrachromacy extends Scene {
     };
 
     private Camera camera;
-    private ShaderProgram skyboxProgram;
+    private ShaderProgram program;
     private Model skybox;
     private float time = 0;
 
@@ -53,41 +53,41 @@ public class Tetrachromacy extends Scene {
         Matrix.multiplyMM(view, 0, eyeView, 0, cameraView, 0);
 
         // Set uniform matrices
-        skyboxProgram.use();
-        skyboxProgram.setUniformMatrix("projection", projection);
-        skyboxProgram.setUniformMatrix("view", view);
+        program.use();
+        program.setUniformMatrix("projection", projection);
+        program.setUniformMatrix("view", view);
 
         //Enable all the attribute buffers
-        skyboxProgram.enableAttribute("position");
-        skyboxProgram.enableAttribute("uv");
+        program.enableAttribute("position");
+        program.enableAttribute("uv");
 
         //Set the parameters
         FloatBuffer modelCoords = skybox.getModelCoords();
-        skyboxProgram.setAttribute("position", modelCoords, 4);
+        program.setAttribute("position", modelCoords, 4);
         FloatBuffer modelUV = skybox.getUVCoords();
-        skyboxProgram.setAttribute("uv", modelUV, 2);
+        program.setAttribute("uv", modelUV, 2);
 
         //Set the number of colors
-        skyboxProgram.setUniform("num_colors", MODE_COLORS[mode]);
-        skyboxProgram.setUniform("time", time);
+        program.setUniform("num_colors", MODE_COLORS[mode]);
+        program.setUniform("time", time);
 
         // load the model matrix into the GPU
         float[] model = skybox.getModelMatrix();
-        skyboxProgram.setUniformMatrix("model", model);
+        program.setUniformMatrix("model", model);
 
-        skyboxProgram.draw(skybox.getNumVertices());
+        program.draw(skybox.getNumVertices());
 
         checkGLError("Render Skybox");
 
         // Disable the attribute buffers
-        skyboxProgram.disableAttributes();
+        program.disableAttributes();
     }
 
     @Override
     public void initShaders(Map<String, Shader> shaders) {
         Shader vert = shaders.get("vert_uv");
         Shader frag = shaders.get("frag_tetrachromacy");
-        skyboxProgram = new ShaderProgram(vert, frag);
+        program = new ShaderProgram(vert, frag);
         checkGLError("Plane program");
     }
 
