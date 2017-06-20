@@ -9,21 +9,36 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * TODO: Document me!
- * Created by Peter on 4/20/2017.
+ * A ShaderProgram handles linking a vertex shader and a fragment shader
+ * into a shader program. It also allows a simpler interface for attaching
+ * variables to the shader.
  */
-
 public class ShaderProgram {
+    /** Program id in OpenGL */
     private int programHandle = -1;
-    // Map of shader variable name -> param id
+    /** Map of shader variable name -> uniform location */
     private Map<String, Integer> uniforms = new HashMap<>();
+    /** Map of shader variable name -> attribute location */
     private Map<String, Integer> attributes = new HashMap<>();
+    /** List of attribute locations that have been enabled */
     private List<Integer> enabledAttributes = new ArrayList<>();
 
+    /**
+     * Constructor
+     * @param vert the vertex shader
+     * @param frag the fragment shader
+     */
     public ShaderProgram(Shader vert, Shader frag) {
         programHandle = makeProgram(vert, frag);
     }
 
+    /**
+     * Create a new shader program, attach shaders
+     * and link them.
+     * @param vert the vertex shader
+     * @param frag the fragment shader
+     * @return the program handle.
+     */
     private int makeProgram(Shader vert, Shader frag) {
         //Create the program
         int program = GLES20.glCreateProgram();

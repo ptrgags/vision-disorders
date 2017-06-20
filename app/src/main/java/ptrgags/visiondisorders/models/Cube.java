@@ -3,10 +3,10 @@ package ptrgags.visiondisorders.models;
 import java.nio.FloatBuffer;
 
 /**
- * TODO: Document me!
+ * Simple cube primitive
  */
-
 public class Cube extends Model {
+    /** Cube coordinates in model space */
     private static final float[] CUBE_COORDS = new float[] {
             //Top face
             -1, 1, -1, 1,
@@ -57,6 +57,7 @@ public class Cube extends Model {
             1, -1, 1, 1
     };
 
+    /** Cube normals in model space */
     private static final float[] CUBE_NORMALS = new float[] {
             //Top face
             0, 1, 0,
@@ -107,16 +108,27 @@ public class Cube extends Model {
             0, -1, 0
     };
 
+    /** Number of vertices per cube (6 triangles) */
     private static final int NUM_VERTICES = 36;
+    /** Cubes are white by default */
     private static final float[] DEFAULT_COLOR = new float[]{1, 1, 1, 1};
 
+    /** float array to store the vertex colors */
     private float[] colors;
 
+    /**
+     * Make a white cube
+     */
     public Cube() {
         this(DEFAULT_COLOR);
     }
 
+    /**
+     * Make a cube with a given color
+     * @param color the color [r, g, b, a], each from 0.0f to 1.0f
+     */
     public Cube(float[] color) {
+        //Copy the color to every vertex.
         final int COLOR_COMPONENTS = 4;
         colors = new float[NUM_VERTICES * COLOR_COMPONENTS];
         for (int i = 0; i < NUM_VERTICES; i++) {

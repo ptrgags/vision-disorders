@@ -8,17 +8,31 @@ import java.io.InputStream;
 import java.util.Scanner;
 
 /**
- * TODO: Document me!
- * Created by Peter on 4/20/2017.
+ * Facade for compiling shaders more easily.
  */
-
 public class Shader {
+    /** shader ID in OpenGL */
     private int shaderHandle = 0;
 
+    /**
+     * Constructor
+     * @param type the type of shader (GLES20.FRAGMENT_SHADER or
+     *             GLES20.VERTEX_SHADER)
+     * @param resId the resource ID of the shader code
+     * @param context the Context for reading the text file.
+     */
     public Shader(int type, int resId, Context context) {
         shaderHandle = loadShader(type, resId, context);
     }
 
+    /**
+     * Load and compile a shader
+     * @param type the type of shader
+     * @param resId the resource ID of the shader
+     * @param context the Context for fetching resources
+     * @return the ID of the compiled shader if successful
+     * @throws RuntimeException on failure
+     */
     private int loadShader(int type, int resId, Context context) {
         //Slurp the shader code
         String code = readTextFile(resId, context);
@@ -38,13 +52,18 @@ public class Shader {
             String err = GLES20.glGetShaderInfoLog(shader);
             Log.e("VisionDisorders", "Shader Error: " + err);
             GLES20.glDeleteShader(shader);
-            shader = 0;
             throw new RuntimeException("Shader Error! See log.");
         } else {
             return shader;
         }
     }
 
+    /**
+     * Slurp a text file as a string
+     * @param resId the resource ID
+     * @param context the Context
+     * @return the contents of the text file.
+     */
     private String readTextFile(int resId, Context context) {
         InputStream inStream = context.getResources().openRawResource(resId);
         Scanner scanner = new Scanner(inStream);

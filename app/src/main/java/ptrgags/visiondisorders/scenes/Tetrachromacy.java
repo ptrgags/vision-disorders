@@ -14,18 +14,38 @@ import ptrgags.visiondisorders.models.Model;
 import ptrgags.visiondisorders.models.Skybox;
 
 /**
- * TODO: Document me!
+ * A small percentage of women have a fourth cone cell between red and green
+ * which allows them to see many more colors than the rest of us.
+ *
+ * Since I can't simulate having extra cones, I decided to explain
+ * tetrachromacy by analogy with color depth
+ *
+ * Go back in time to when there was only a few colors per red/green/blue
+ * channel. it was possible to have pictures, but they seemed rather
+ * posterized compared to the colorful images we have with 8+ bits per
+ * color channel. The difference? We can see many times more shades of color.
+ *
+ * This simulation consists of a skybox shape but shaded with a custom
+ * shader that draws a rainbow either at a low or high color depth.
+ *
+ * Variations:
+ * 0. Reduced color-depth image as an analogy to regular trichromatic vision
+ * 1. Full-color image as an analogy to tetrachromatic vision.
  */
-
 public class Tetrachromacy extends Scene {
+    /** colors for each mode */
     private static final float[] MODE_COLORS = new float[] {
-        8.0f,   // Normal color
+        8.0f,   // Analogous to normal color
         256.0f // Tetrachromacy: Much more color differentiation
     };
 
+    /** Camera for viewing the scene */
     private Camera camera;
+    /** Tetrachromacy shader program */
     private ShaderProgram program;
+    /** skybox that will be rendered with the custom shader */
     private Model skybox;
+    /** some unit of time for animating the shader */
     private float time = 0;
 
     @Override

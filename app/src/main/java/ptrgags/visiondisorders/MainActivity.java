@@ -28,17 +28,27 @@ import ptrgags.visiondisorders.scenes.Hemianopia;
 import ptrgags.visiondisorders.scenes.Scene;
 import ptrgags.visiondisorders.scenes.Tetrachromacy;
 
-//TODO: Document me!
-public class MainActivity extends GvrActivity implements GvrView.StereoRenderer {
+/**
+ * This is the only activity in the app. It is a Google VR activity
+ * that handles switching between the different scenes.
+ *
+ * This class also can render an indicator showing which mode the user
+ * is currently in.
+ */
+public class MainActivity
+        extends GvrActivity
+        implements GvrView.StereoRenderer {
+    /** list of scenes to cycle through. */
     private List<Scene> scenes = new ArrayList<>();
+    /** Current scene number */
     private int selectedSceneIndex = 0;
+    /** shader program for the mode indicator overlay */
     private ShaderProgram indicatorProgram;
-    // Camera for the indicator
+    /** Camera for the indicator */
     private Camera camera;
-    // Plane for rendering the mode indicator.
+    /** Plane for rendering the mode indicator */
     private Model indicatorPlane;
-
-    // Set this to true to show the indicators.
+    /** Set this to true to show the indicators. By default they are off */
     private boolean indicatorsVisible = false;
 
     /**
@@ -66,6 +76,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         createScenes();
     }
 
+    /**
+     * Initialize all the scenes and add them to the list.
+     */
     private void createScenes() {
         Scene colorblindness = new Colorblindness();
         scenes.add(colorblindness);
@@ -172,6 +185,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         initIndicator(shaders);
     }
 
+    /**
+     * Initialize a pseudo-Scene for the mode indicator.
+     * @param shaders the map of shader names and shaders.
+     */
     private void initIndicator(Map<String, Shader> shaders) {
         Shader vert = shaders.get("vert_uv");
         Shader frag = shaders.get("frag_indicator");
@@ -226,6 +243,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         scenes.get(selectedSceneIndex).next();
     }
 
+    /**
+     * Check for OpenGL errors and raise an exception on error
+     * @param label the label for the message
+     */
     public static void checkGLError(String label) {
         int error = GLES20.glGetError();
         if (error != GLES20.GL_NO_ERROR) {
@@ -263,6 +284,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             case KeyEvent.KEYCODE_BUTTON_START:
                 scenes.get(selectedSceneIndex).reset();
             case KeyEvent.KEYCODE_BUTTON_SELECT:
+                // Toggle showing mode indicators.
                 indicatorsVisible = !indicatorsVisible;
             default:
                 Log.i("Vision Disorders", "User pressed: " + event.toString());
@@ -270,6 +292,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         return true;
     }
 
+    /**
+     * Cycle to the next scene.
+     */
     private void nextScene() {
         selectedSceneIndex++;
         selectedSceneIndex %= scenes.size();
@@ -277,6 +302,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         scenes.get(selectedSceneIndex).reset();
     }
 
+    /**
+     * Cycle to the previous scene.
+     */
     private void prevScene() {
         selectedSceneIndex--;
         selectedSceneIndex %= scenes.size();

@@ -3,12 +3,14 @@ package ptrgags.visiondisorders.models;
 import java.nio.FloatBuffer;
 
 /**
- * TODO: Document me!
- * Created by Peter on 5/10/2017.
+ * This is a lot like a cube, but the front faces are on the inside of the
+ * cube.
  */
-
 public class Skybox extends Model {
+    /** Total number of vertices */
     private static final int NUM_VERTICES = 36;
+
+    /** vertex coordinates in world space */
     private static final float[] SKYBOX_COORDS = new float[]{
             // Bottom
             -1, -1, -1, 1,
@@ -59,6 +61,7 @@ public class Skybox extends Model {
             -1, 1, -1, 1
     };
 
+    /** vertex normals */
     private static final float[] SKYBOX_NORMALS = new float[] {
             //Botttom
             0, 0, 1,
@@ -109,6 +112,7 @@ public class Skybox extends Model {
             0, -1, 0
     };
 
+    /** vertex UV coordinates */
     private static final float[] SKYBOX_UV = new float[] {
             // Bottom
             0.25f, 0.75f,

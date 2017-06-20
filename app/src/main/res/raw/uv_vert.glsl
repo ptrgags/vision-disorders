@@ -19,5 +19,6 @@ void main() {
     // Pass through UV coordinates
     v_uv = uv;
 
+    // Calculate the position in clip space
     gl_Position = projection * view * model * position;
 }

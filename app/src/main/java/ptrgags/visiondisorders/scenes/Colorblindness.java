@@ -15,15 +15,35 @@ import ptrgags.visiondisorders.ShaderProgram;
 import ptrgags.visiondisorders.models.Cube;
 import ptrgags.visiondisorders.models.Model;
 
-//TODO: Document me!
+/**
+ * Color blindness is the deficiency of color vision caused by one or more
+ * types of malfunctioning cone cells.
+ *
+ * This simulation places the viewer in the center of an RGB cube made of
+ * smaller cubes. Each variation changes the color filter on each cube to
+ * simulate the lack of red, green or blue vision. The filters are applied at
+ * the shader level of each cube.
+ *
+ * Variations:
+ *
+ * 0. Normal vision
+ * 1. Protanopia (loss of red vision)
+ * 2. Deuteranopia (loss of green vision)
+ * 3. Tritanopia (loss of blue vision)
+ */
 public class Colorblindness extends Scene {
+    /** Number of variations */
     private static final int NUM_COLOR_BLINDNESS_MODES = 5;
+    /** position of the light in world space */
     private static final float[] LIGHT_POS = new float[] {
             10.0f, 1.0f, 0.0f, 0.0f
     };
 
+    /** all the cubes to draw */
     private List<Model> cubes = new ArrayList<>();
+    /** shader for rendering the cubes */
     private ShaderProgram program;
+    /** camera for viewing the scene */
     private Camera camera;
 
     @Override
@@ -100,7 +120,13 @@ public class Colorblindness extends Scene {
         checkGLError("Plane program");
     }
 
+    /**
+     * Build the RGB cube made out of RGB cubes. More specifically, we only
+     * want the outermost part of the cube since the viewer is standing in
+     * the middle of the cube.
+     */
     private void initCubes() {
+        //Radius in L-\infty space to be technicall
         final int CUBE_RADIUS = 3;
         final float OFFSET = 4.0f;
         for (int i = -CUBE_RADIUS; i <= CUBE_RADIUS; i++) {
@@ -112,12 +138,16 @@ public class Colorblindness extends Scene {
                     if (maxComponent < CUBE_RADIUS)
                         continue;
 
+                    // Select the color. One corner is black, then the x
+                    // direction is red, y blue, z red.
                     float[] color = new float[] {
                             (i + 2.0f) / 4.0f,
                             (j + 2.0f) / 4.0f,
                             (k + 2.0f) / 4.0f,
                             1
                     };
+
+                    //Make the cube and translate it into place
                     Model cube = new Cube(color);
                     cube.translate(OFFSET * i, OFFSET * j, OFFSET * k);
                     cubes.add(cube);

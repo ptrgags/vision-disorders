@@ -10,11 +10,11 @@ import java.util.Map;
 import ptrgags.visiondisorders.Shader;
 
 /**
- * TODO: Document me!
- * A scene manages the models and
+ * A scene manages the models and shaders for a single simulation.
+ * It also has a number of variations that can be cycled through.
  */
 public abstract class Scene {
-    // Mode number;
+    /** Mode number */
     protected int mode;
 
     /**
@@ -42,6 +42,10 @@ public abstract class Scene {
      */
     public abstract void initShaders(Map<String, Shader> shaders);
 
+    /**
+     * Check for OpenGL errors and raise exceptions if something goes wrong
+     * @param label the label to
+     */
     public static void checkGLError(String label) {
         int error = GLES20.glGetError();
         if (error != GLES20.GL_NO_ERROR) {
@@ -76,6 +80,9 @@ public abstract class Scene {
         mode = 0;
     }
 
+    /**
+     * Called once per frame
+     */
     public void onFrame() {}
 
     /**

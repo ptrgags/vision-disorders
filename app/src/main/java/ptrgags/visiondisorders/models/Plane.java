@@ -5,9 +5,9 @@ import java.nio.FloatBuffer;
 /**
  * a simple square plane shape. 2 Triangles. Can't get much
  * simpler than that.
- * TODO: Document me!
  */
 public class Plane extends Model {
+    /** vertex coordinates in model space */
     private static final float[] PLANE_COORDS = new float[] {
             //First triangle
             -1, 0, -1, 1,
@@ -20,6 +20,7 @@ public class Plane extends Model {
             1, 0, -1, 1,
     };
 
+    /** vertex normals */
     private static final float[] PLANE_NORMALS = new float[] {
             //All normals point upwards!
             0, 1, 0,
@@ -30,6 +31,7 @@ public class Plane extends Model {
             0, 1, 0
     };
 
+    /** vertex UV coordinates */
     private static final float[] PLANE_UV = new float[] {
             //First Triangle
             0, 1,
@@ -42,16 +44,27 @@ public class Plane extends Model {
             1, 1,
     };
 
+    /** number of vertices in total */
     private static final int NUM_VERTICES = 6;
+    /** Default color is white */
     private static final float[] DEFAULT_COLOR = new float[]{1, 1, 1, 1};
 
+    /** vertex colors */
     private float[] colors;
 
+    /**
+     * Make a white plane
+     */
     public Plane() {
         this(DEFAULT_COLOR);
     }
 
+    /**
+     * Create a plane with a given color
+     * @param color the color [r, g, b, a]
+     */
     public Plane(float[] color) {
+        //Copy the color for each vertex
         final int COLOR_COMPONENTS = 4;
         colors = new float[NUM_VERTICES * COLOR_COMPONENTS];
         for (int i = 0; i < NUM_VERTICES; i++) {
