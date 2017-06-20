@@ -135,6 +135,6 @@ void main() {
         //We have a problem, make everything magenta as an error.
          gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
 
-    //Apply lambert shading
+    //Apply lambert_frag shading
     gl_FragColor = gl_FragColor * diffuse_lighting();
 }

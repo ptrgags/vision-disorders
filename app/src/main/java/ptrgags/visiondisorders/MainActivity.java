@@ -15,7 +15,6 @@ import com.google.vr.sdk.base.Viewport;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -97,11 +96,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             drawIndicators();
     }
 
+    /**
+     * Draw indicator circles in orthographic projection on top of the
+     * scene. This can help to see how many simulations/variations are
+     * available.
+     */
     private void drawIndicators() {
         //Set drawing bits.
-        //TODO: Simplify this?
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        GLES20.glEnable(GLES20.GL_CULL_FACE);
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         checkGLError("Color settings");
@@ -187,40 +188,40 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         indicatorPlane.rotate(90, 1, 0, 0);
     }
 
-    //TODO: make a class that handles this?
+    /**
+     * Compile all the shadeers needed and make a map of them with
+     * unique Ids. then Scenes can select these shaders as needed.
+     * @return a map of shader ID -> shader. IDs always start with
+     * vert_ or frag_ to denote the shader type
+     */
     private Map<String,Shader> makeShaders() {
-        //Make Vertex shaders
-        Map<String, Shader> shaders = new HashMap<>();
+        ShaderMapBuilder builder = new ShaderMapBuilder(this);
 
-        // Create shaders
-        Shader colorblindness = new Shader(
-                GLES20.GL_FRAGMENT_SHADER, R.raw.color_blindness, this);
-        Shader lighting = new Shader(
-                GLES20.GL_VERTEX_SHADER, R.raw.lighting, this);
-        Shader lambert = new Shader(
-                GLES20.GL_FRAGMENT_SHADER, R.raw.lambert, this);
-        Shader skyboxVert = new Shader(
-                GLES20.GL_VERTEX_SHADER, R.raw.skybox_vert, this);
-        Shader skyboxFrag = new Shader(
-                GLES20.GL_FRAGMENT_SHADER, R.raw.skybox_frag, this);
-        Shader tetraFrag = new Shader(
-                GLES20.GL_FRAGMENT_SHADER, R.raw.tetrachrome_frag, this);
-        Shader simpleUV = new Shader(
-                GLES20.GL_VERTEX_SHADER, R.raw.simple_uv, this);
-        Shader indicatorFrag = new Shader(
-                GLES20.GL_FRAGMENT_SHADER, R.raw.mode_indicator, this);
+        // Compile the vertex shaders
+        // Used in colorblindness, akinetopsia and hemianopia simulations
+        builder.makeShader("vert_lighting", R.raw.lighting_vert);
+        // Used in tetrachromacy and mode indicator shaders
+        builder.makeShader("vert_uv", R.raw.uv_vert);
 
-        // Store the shaders in a hash map
-        shaders.put("frag_colorblind", colorblindness);
-        shaders.put("vert_lighting", lighting);
-        shaders.put("frag_lambert", lambert);
-        shaders.put("vert_skybox", skyboxVert);
-        shaders.put("frag_skybox", skyboxFrag);
-        shaders.put("frag_tetrachrome", tetraFrag);
-        shaders.put("vert_uv", simpleUV);
-        shaders.put("frag_indicator", indicatorFrag);
+        //TODO: Remove me
+        builder.makeShader("vert_skybox", R.raw.skybox_vert);
 
-        return shaders;
+        // Compile the fragment shaders
+        //Used in colorblindness simulation
+        builder.makeShader("frag_colorblindness", R.raw.colorblindness_frag);
+        // Used in akinetopsia and hemianopia simulations
+        builder.makeShader("frag_lambert", R.raw.lambert_frag);
+        // Used in the tetrachromacy simulation
+        builder.makeShader("frag_tetrachromacy", R.raw.tetrachromacy_frag);
+        // Used in the mode indicator shader
+        builder.makeShader("frag_indicator", R.raw.indicator_frag);
+
+        //TODO: Remove me
+        builder.makeShader("frag_skybox", R.raw.skybox_frag);
+
+        // Fetch the map of compiled shaders
+        return builder.getShaderMap();
+
     }
 
     @Override

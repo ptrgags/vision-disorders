@@ -95,7 +95,7 @@ public class Colorblindness extends Scene {
     @Override
     public void initShaders(Map<String, Shader> shaders) {
         Shader vert = shaders.get("vert_lighting");
-        Shader colorblind = shaders.get("frag_colorblind");
+        Shader colorblind = shaders.get("frag_colorblindness");
         cubeProgram = new ShaderProgram(vert, colorblind);
         checkGLError("Plane program");
     }

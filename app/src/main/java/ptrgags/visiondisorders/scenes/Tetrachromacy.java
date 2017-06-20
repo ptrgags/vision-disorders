@@ -86,7 +86,7 @@ public class Tetrachromacy extends Scene {
     @Override
     public void initShaders(Map<String, Shader> shaders) {
         Shader vert = shaders.get("vert_uv");
-        Shader frag = shaders.get("frag_tetrachrome");
+        Shader frag = shaders.get("frag_tetrachromacy");
         skyboxProgram = new ShaderProgram(vert, frag);
         checkGLError("Plane program");
     }
