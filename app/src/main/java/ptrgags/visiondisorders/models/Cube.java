@@ -3,7 +3,7 @@ package ptrgags.visiondisorders.models;
 import java.nio.FloatBuffer;
 
 /**
- * Created by Peter on 4/23/2017.
+ * TODO: Document me!
  */
 
 public class Cube extends Model {
@@ -144,5 +144,10 @@ public class Cube extends Model {
     @Override
     public FloatBuffer getUVCoords() {
         return null;
+    }
+
+    @Override
+    public int getNumVertices() {
+        return NUM_VERTICES;
     }
 }

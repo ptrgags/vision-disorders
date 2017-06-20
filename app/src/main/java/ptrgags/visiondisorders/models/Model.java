@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+//TODO: Document me!
 public abstract class Model {
     private float[] rotateMatrix = new float[16];
     private float[] translateMatrix = new float[16];
@@ -73,6 +74,8 @@ public abstract class Model {
     public abstract FloatBuffer getModelNormals();
 
     public abstract FloatBuffer getUVCoords();
+
+    public abstract int getNumVertices();
 
     public static FloatBuffer makeVertexBuffer(float[] vertices) {
         ByteBuffer bytebuffer = ByteBuffer.allocateDirect(vertices.length * 4);

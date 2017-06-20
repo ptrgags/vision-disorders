@@ -16,7 +16,7 @@ import ptrgags.visiondisorders.models.Cube;
 import ptrgags.visiondisorders.models.Model;
 
 /**
- * Created by Peter on 5/5/2017.
+ * TODO: Document me!
  */
 
 public class Akinetopsia extends Scene {
@@ -146,8 +146,7 @@ public class Akinetopsia extends Scene {
             FloatBuffer modelColors = block.getModelColors();
             cubeProgram.setAttribute("color", modelColors, 4);
 
-            //TODO: models should have a way to get the number of vertices
-            cubeProgram.draw(36);
+            cubeProgram.draw(block.getNumVertices());
 
             checkGLError("Render Cube");
         }

@@ -17,6 +17,7 @@ import ptrgags.visiondisorders.models.Model;
 import ptrgags.visiondisorders.models.Plane;
 
 /**
+ * TODO: Document me!
  * Created by Peter on 5/6/2017.
  */
 
@@ -210,8 +211,7 @@ public class Hemianopia extends Scene {
             FloatBuffer modelColors = block.getModelColors();
             blockProgram.setAttribute("color", modelColors, 4);
 
-            //TODO: models should have a way to get the number of vertices
-            blockProgram.draw(36);
+            blockProgram.draw(block.getNumVertices());
 
             checkGLError("Render Cube");
         }
@@ -252,8 +252,7 @@ public class Hemianopia extends Scene {
             FloatBuffer modelColors = occ.getModelColors();
             blockProgram.setAttribute("color", modelColors, 4);
 
-            //TODO: models should have a way to get the number of vertices
-            blockProgram.draw(6);
+            blockProgram.draw(occ.getNumVertices());
 
             checkGLError("Render Occluder");
         }

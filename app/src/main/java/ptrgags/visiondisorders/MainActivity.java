@@ -29,6 +29,7 @@ import ptrgags.visiondisorders.scenes.Hemianopia;
 import ptrgags.visiondisorders.scenes.Scene;
 import ptrgags.visiondisorders.scenes.Tetrachromacy;
 
+//TODO: Document me!
 public class MainActivity extends GvrActivity implements GvrView.StereoRenderer {
     private List<Scene> scenes = new ArrayList<>();
     private int selectedSceneIndex = 0;
@@ -141,8 +142,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         FloatBuffer uvCoords = indicatorPlane.getUVCoords();
         indicatorProgram.setAttribute("uv", uvCoords, 2);
 
-        //TODO: Get the number of vertices dynamically
-        indicatorProgram.draw(6);
+        indicatorProgram.draw(indicatorPlane.getNumVertices());
 
         // Disable the attribute buffers
         indicatorProgram.disableAttributes();
@@ -189,6 +189,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         indicatorPlane.rotate(90, 1, 0, 0);
     }
 
+    //TODO: make a class that handles this?
     private Map<String,Shader> makeShaders() {
         //Make Vertex shaders
         Map<String, Shader> shaders = new HashMap<>();
@@ -224,6 +225,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         return shaders;
     }
 
+    //TODO: Can we delete this?
     private Map<String, Texture> makeTextures() {
         Texture citySkybox = new Texture(this, R.drawable.skybox_city);
         Texture colorful = new Texture(this, R.drawable.colorful);

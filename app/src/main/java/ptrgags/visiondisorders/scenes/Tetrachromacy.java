@@ -14,7 +14,7 @@ import ptrgags.visiondisorders.models.Model;
 import ptrgags.visiondisorders.models.Skybox;
 
 /**
- * Created by Peter on 5/15/2017.
+ * TODO: Document me!
  */
 
 public class Tetrachromacy extends Scene {
@@ -75,8 +75,7 @@ public class Tetrachromacy extends Scene {
         float[] model = skybox.getModelMatrix();
         skyboxProgram.setUniformMatrix("model", model);
 
-        //TODO: models should have a way to get the number of vertices
-        skyboxProgram.draw(36);
+        skyboxProgram.draw(skybox.getNumVertices());
 
         checkGLError("Render Skybox");
 

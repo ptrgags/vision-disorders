@@ -7,6 +7,7 @@ import android.opengl.GLES20;
 import android.opengl.GLUtils;
 
 /**
+ * TODO: Can we delete this?
  * Created by Peter on 5/11/2017.
  */
 

@@ -11,6 +11,7 @@ import ptrgags.visiondisorders.Shader;
 import ptrgags.visiondisorders.Texture;
 
 /**
+ * TODO: Document me!
  * A scene manages the models and
  */
 public abstract class Scene {
@@ -42,6 +43,7 @@ public abstract class Scene {
      */
     public abstract void initShaders(Map<String, Shader> shaders);
 
+    //TODO: Can we delete this?
     public void initTextures(Map<String, Texture> textures){}
 
     public static void checkGLError(String label) {

@@ -3,6 +3,7 @@ package ptrgags.visiondisorders;
 import android.opengl.Matrix;
 
 /**
+ * TODO: Document me!
  * Created by Peter on 4/20/2017.
  */
 

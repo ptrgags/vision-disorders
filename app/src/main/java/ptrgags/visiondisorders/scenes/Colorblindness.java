@@ -15,6 +15,7 @@ import ptrgags.visiondisorders.ShaderProgram;
 import ptrgags.visiondisorders.models.Cube;
 import ptrgags.visiondisorders.models.Model;
 
+//TODO: Document me!
 public class Colorblindness extends Scene {
     private static final int NUM_COLOR_BLINDNESS_MODES = 5;
     private static final float[] LIGHT_POS = new float[] {
@@ -82,8 +83,7 @@ public class Colorblindness extends Scene {
             FloatBuffer modelColors = m.getModelColors();
             cubeProgram.setAttribute("color", modelColors, 4);
 
-            //TODO: models should have a way to get the number of vertices
-            cubeProgram.draw(36);
+            cubeProgram.draw(m.getNumVertices());
 
             checkGLError("Render Cube");
         }

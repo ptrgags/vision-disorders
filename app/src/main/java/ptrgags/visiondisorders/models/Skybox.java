@@ -3,10 +3,12 @@ package ptrgags.visiondisorders.models;
 import java.nio.FloatBuffer;
 
 /**
+ * TODO: Document me!
  * Created by Peter on 5/10/2017.
  */
 
 public class Skybox extends Model {
+    private static final int NUM_VERTICES = 36;
     private static final float[] SKYBOX_COORDS = new float[]{
             // Bottom
             -1, -1, -1, 1,
@@ -169,11 +171,16 @@ public class Skybox extends Model {
 
     @Override
     public FloatBuffer getModelNormals() {
-        return null;
+        return makeVertexBuffer(SKYBOX_NORMALS);
     }
 
     @Override
     public FloatBuffer getUVCoords() {
         return makeVertexBuffer(SKYBOX_UV);
+    }
+
+    @Override
+    public int getNumVertices() {
+        return NUM_VERTICES;
     }
 }

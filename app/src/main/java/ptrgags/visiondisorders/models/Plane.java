@@ -5,6 +5,7 @@ import java.nio.FloatBuffer;
 /**
  * a simple square plane shape. 2 Triangles. Can't get much
  * simpler than that.
+ * TODO: Document me!
  */
 public class Plane extends Model {
     private static final float[] PLANE_COORDS = new float[] {
@@ -78,5 +79,10 @@ public class Plane extends Model {
     @Override
     public FloatBuffer getUVCoords() {
         return makeVertexBuffer(PLANE_UV);
+    }
+
+    @Override
+    public int getNumVertices() {
+        return NUM_VERTICES;
     }
 }
