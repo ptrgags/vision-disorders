@@ -1,6 +1,5 @@
 package ptrgags.visiondisorders.scenes;
 
-import android.opengl.GLES20;
 import android.opengl.Matrix;
 
 import com.google.vr.sdk.base.Eye;
@@ -16,14 +15,35 @@ import ptrgags.visiondisorders.ShaderProgram;
 import ptrgags.visiondisorders.models.Cube;
 import ptrgags.visiondisorders.models.Model;
 
+/**
+ * Color blindness is the deficiency of color vision caused by one or more
+ * types of malfunctioning cone cells.
+ *
+ * This simulation places the viewer in the center of an RGB cube made of
+ * smaller cubes. Each variation changes the color filter on each cube to
+ * simulate the lack of red, green or blue vision. The filters are applied at
+ * the shader level of each cube.
+ *
+ * Variations:
+ *
+ * 0. Normal vision
+ * 1. Protanopia (loss of red vision)
+ * 2. Deuteranopia (loss of green vision)
+ * 3. Tritanopia (loss of blue vision)
+ */
 public class Colorblindness extends Scene {
+    /** Number of variations */
     private static final int NUM_COLOR_BLINDNESS_MODES = 5;
+    /** position of the light in world space */
     private static final float[] LIGHT_POS = new float[] {
             10.0f, 1.0f, 0.0f, 0.0f
     };
 
+    /** all the cubes to draw */
     private List<Model> cubes = new ArrayList<>();
-    private ShaderProgram cubeProgram;
+    /** shader for rendering the cubes */
+    private ShaderProgram program;
+    /** camera for viewing the scene */
     private Camera camera;
 
     @Override
@@ -38,11 +58,7 @@ public class Colorblindness extends Scene {
 
     @Override
     public void onDraw(Eye eye) {
-        //Set drawing bits.
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        GLES20.glEnable(GLES20.GL_CULL_FACE);
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        checkGLError("Color settings");
+        super.onDraw(eye);
 
         //Get the projection matrix
         float[] projection = eye.getPerspective(0.1f, 100.0f);
@@ -53,80 +69,64 @@ public class Colorblindness extends Scene {
         float[] view = new float[16];
         Matrix.multiplyMM(view, 0, eyeView, 0, cameraView, 0);
 
-        cubeProgram.use();
-        GLES20.glUniformMatrix4fv(
-                cubeProgram.getUniform("projection"), 1, false, projection, 0);
-        GLES20.glUniformMatrix4fv(
-                cubeProgram.getUniform("view"), 1, false, view, 0);
-        GLES20.glUniform1i(
-                cubeProgram.getUniform("colorblind_mode"), mode);
+        // Set matrices and uniforms
+        program.use();
+        program.setUniformMatrix("projection", projection);
+        program.setUniformMatrix("view", view);
+        program.setUniform("colorblind_mode", mode);
 
         //Get the light position in view space
         float[] light_pos = new float[4];
         Matrix.multiplyMV(light_pos, 0, view, 0, LIGHT_POS, 0);
+        program.setUniformVector("light_pos", light_pos);
 
-        GLES20.glUniform3fv(
-                cubeProgram.getUniform("light_pos"), 1, light_pos, 0);
-
-        int modelParam = cubeProgram.getUniform("model");
-        int posParam = cubeProgram.getAttribute("position");
-        int colorParam = cubeProgram.getAttribute("color");
-        int normalParam = cubeProgram.getAttribute("normal");
-
-        //Enable all the attribute buffers
-        GLES20.glEnableVertexAttribArray(posParam);
-        GLES20.glEnableVertexAttribArray(colorParam);
-        GLES20.glEnableVertexAttribArray(normalParam);
+        //Enable attribute buffers
+        program.enableAttribute("position");
+        program.enableAttribute("color");
+        program.enableAttribute("normal");
 
         // Since all the cubes have the same vertices and normals, only load
         // them into the shader once
         Model firstCube = cubes.get(0);
         FloatBuffer modelCoords = firstCube.getModelCoords();
-        GLES20.glVertexAttribPointer(
-                posParam, 4, GLES20.GL_FLOAT, false, 0, modelCoords);
+        program.setAttribute("position", modelCoords, 4);
         FloatBuffer modelNormals = firstCube.getModelNormals();
-        GLES20.glVertexAttribPointer(
-                normalParam, 3, GLES20.GL_FLOAT, false, 0, modelNormals);
+        program.setAttribute("normal", modelNormals, 3);
 
         // Render each cube. Only the color and position needs to change.
         for (Model m : cubes) {
+            // Set the model matrix
             float[] model = m.getModelMatrix();
-            GLES20.glUniformMatrix4fv(modelParam, 1, false, model, 0);
+            program.setUniformMatrix("model", model);
 
+            // Set the color attribute
             FloatBuffer modelColors = m.getModelColors();
-            GLES20.glVertexAttribPointer(
-                    colorParam, 4, GLES20.GL_FLOAT, false, 0, modelColors);
+            program.setAttribute("color", modelColors, 4);
 
-            //TODO: models should have a way to get the number of vertices
-            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 36);
+            program.draw(m.getNumVertices());
 
             checkGLError("Render Cube");
         }
 
         // Disable the attribute buffers
-        GLES20.glDisableVertexAttribArray(posParam);
-        GLES20.glDisableVertexAttribArray(colorParam);
-        GLES20.glDisableVertexAttribArray(normalParam);
+        program.disableAttributes();
     }
 
     @Override
     public void initShaders(Map<String, Shader> shaders) {
         Shader vert = shaders.get("vert_lighting");
-        Shader colorblind = shaders.get("frag_colorblind");
-        cubeProgram = new ShaderProgram(vert, colorblind);
+        Shader colorblind = shaders.get("frag_colorblindness");
+        program = new ShaderProgram(vert, colorblind);
         checkGLError("Plane program");
-        cubeProgram.addUniform("model");
-        cubeProgram.addUniform("view");
-        cubeProgram.addUniform("projection");
-        cubeProgram.addUniform("colorblind_mode");
-        cubeProgram.addUniform("light_pos");
-        cubeProgram.addAttribute("position");
-        cubeProgram.addAttribute("color");
-        cubeProgram.addAttribute("normal");
-        checkGLError("Plane Params");
     }
 
+    /**
+     * Build the RGB cube made out of RGB cubes. More specifically, we only
+     * want the outermost part of the cube since the viewer is standing in
+     * the middle of the cube.
+     */
     private void initCubes() {
+        //Radius in L-\infty space to be technicall
         final int CUBE_RADIUS = 3;
         final float OFFSET = 4.0f;
         for (int i = -CUBE_RADIUS; i <= CUBE_RADIUS; i++) {
@@ -138,12 +138,16 @@ public class Colorblindness extends Scene {
                     if (maxComponent < CUBE_RADIUS)
                         continue;
 
+                    // Select the color. One corner is black, then the x
+                    // direction is red, y blue, z red.
                     float[] color = new float[] {
                             (i + 2.0f) / 4.0f,
                             (j + 2.0f) / 4.0f,
                             (k + 2.0f) / 4.0f,
                             1
                     };
+
+                    //Make the cube and translate it into place
                     Model cube = new Cube(color);
                     cube.translate(OFFSET * i, OFFSET * j, OFFSET * k);
                     cubes.add(cube);

@@ -3,12 +3,14 @@ package ptrgags.visiondisorders;
 import android.opengl.Matrix;
 
 /**
- * Created by Peter on 4/20/2017.
+ * Object to construct the camera's view matrix.
  */
-
 public class Camera {
+    /** camera position */
     private float[] position = new float[3];
+    /** the point the camera is looking at */
     private float[] target = new float[3];
+    /** the up vector for the camera */
     private float[] up = new float[3];
 
     public void setPosition(float x, float y, float z) {
@@ -29,6 +31,10 @@ public class Camera {
         up[2] = z;
     }
 
+    /**
+     * Calculate the view matrix
+     * @return the current view matrix
+     */
     public float[] getViewMatrix() {
         float[] view = new float[16];
         Matrix.setLookAtM(

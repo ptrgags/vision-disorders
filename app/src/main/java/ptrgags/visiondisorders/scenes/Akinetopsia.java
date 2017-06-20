@@ -1,6 +1,5 @@
 package ptrgags.visiondisorders.scenes;
 
-import android.opengl.GLES20;
 import android.opengl.Matrix;
 
 import com.google.vr.sdk.base.Eye;
@@ -17,9 +16,20 @@ import ptrgags.visiondisorders.models.Cube;
 import ptrgags.visiondisorders.models.Model;
 
 /**
- * Created by Peter on 5/5/2017.
+ * Akinetopsia (Motion Blindness) is a condition where one is not able
+ * to process motion correctly. It manifests itself by seeing the world
+ * in snapshots.
+ *
+ * I simulated this by intentionally killing the frame rate. Only one frame
+ * out of every 120 frames is drawn
+ *
+ * This simulation consists of four pyramidal stacks of blocks that rotate
+ * around the viewer. Akinetopsia mode can be turned on and off.
+ *
+ * Variations:
+ * 0. Normal vision
+ * 1. Akinetopsia vision
  */
-
 public class Akinetopsia extends Scene {
     /** Normal vision, don't skip a frame */
     private static final int RATE_NORMAL = 1;
@@ -50,9 +60,13 @@ public class Akinetopsia extends Scene {
             DISTANCE - 3.0f, 3.0f, 0, 0
     };
 
+    /** Camera for viewing the scene */
     private Camera camera;
-    private ShaderProgram cubeProgram;
+    /** shader program for rendering the blocks */
+    private ShaderProgram program;
+    /** Frame count */
     private long frameCount = 0;
+    /** Blocks that swirl around the viewer */
     private List<Model> blocks = new ArrayList<>();
 
     @Override
@@ -102,11 +116,9 @@ public class Akinetopsia extends Scene {
         if (frameCount % RATES[mode] != 0)
             return;
 
-        //Set drawing bits.
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        GLES20.glEnable(GLES20.GL_CULL_FACE);
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        checkGLError("Color settings");
+        // The super call comes after the frame skip to make sure the screen
+        // is not cleared.
+        super.onDraw(eye);
 
         //Get the projection matrix
         float[] projection = eye.getPerspective(1.0f, 50.0f);
@@ -117,74 +129,53 @@ public class Akinetopsia extends Scene {
         float[] view = new float[16];
         Matrix.multiplyMM(view, 0, eyeView, 0, cameraView, 0);
 
-        cubeProgram.use();
-        GLES20.glUniformMatrix4fv(
-                cubeProgram.getUniform("projection"), 1, false, projection, 0);
-        GLES20.glUniformMatrix4fv(
-                cubeProgram.getUniform("view"), 1, false, view, 0);
+        // Set the projection and view matricies
+        program.use();
+        program.setUniformMatrix("projection", projection);
+        program.setUniformMatrix("view", view);
 
         //Get the light position in view space
         float[] light_pos = new float[4];
         Matrix.multiplyMV(light_pos, 0, view, 0, LIGHT_POS, 0);
-
-        GLES20.glUniform3fv(
-                cubeProgram.getUniform("light_pos"), 1, light_pos, 0);
-
-        int modelParam = cubeProgram.getUniform("model");
-        int posParam = cubeProgram.getAttribute("position");
-        int colorParam = cubeProgram.getAttribute("color");
-        int normalParam = cubeProgram.getAttribute("normal");
+        program.setUniformVector("light_pos", light_pos);
 
         //Enable all the attribute buffers
-        GLES20.glEnableVertexAttribArray(posParam);
-        GLES20.glEnableVertexAttribArray(colorParam);
-        GLES20.glEnableVertexAttribArray(normalParam);
-
+        program.enableAttribute("position");
+        program.enableAttribute("color");
+        program.enableAttribute("normal");
 
         // Since all the cubes have the same vertices and normals, only load
         // them into the shader once
         Model firstBlock = blocks.get(0);
         FloatBuffer modelCoords = firstBlock.getModelCoords();
-        GLES20.glVertexAttribPointer(
-                posParam, 4, GLES20.GL_FLOAT, false, 0, modelCoords);
+        program.setAttribute("position", modelCoords, 4);
         FloatBuffer modelNormals = firstBlock.getModelNormals();
-        GLES20.glVertexAttribPointer(
-                normalParam, 3, GLES20.GL_FLOAT, false, 0, modelNormals);
+        program.setAttribute("normal", modelNormals, 3);
 
         // Render each cube. Only the color and position needs to change.
         for (Model block : blocks) {
             float[] model = block.getModelMatrix();
-            GLES20.glUniformMatrix4fv(modelParam, 1, false, model, 0);
+            program.setUniformMatrix("model", model);
 
+            // Set the vertex colors
             FloatBuffer modelColors = block.getModelColors();
-            GLES20.glVertexAttribPointer(
-                    colorParam, 4, GLES20.GL_FLOAT, false, 0, modelColors);
+            program.setAttribute("color", modelColors, 4);
 
-            //TODO: models should have a way to get the number of vertices
-            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 36);
+            program.draw(block.getNumVertices());
 
             checkGLError("Render Cube");
         }
+
         // Disable the attribute buffers
-        GLES20.glDisableVertexAttribArray(posParam);
-        GLES20.glDisableVertexAttribArray(colorParam);
-        GLES20.glDisableVertexAttribArray(normalParam);
+        program.disableAttributes();
     }
 
     @Override
     public void initShaders(Map<String, Shader> shaders) {
         Shader lighting = shaders.get("vert_lighting");
         Shader lambert = shaders.get("frag_lambert");
-        cubeProgram = new ShaderProgram(lighting, lambert);
+        program = new ShaderProgram(lighting, lambert);
         checkGLError("Plane program");
-        cubeProgram.addUniform("model");
-        cubeProgram.addUniform("view");
-        cubeProgram.addUniform("projection");
-        cubeProgram.addUniform("light_pos");
-        cubeProgram.addAttribute("position");
-        cubeProgram.addAttribute("color");
-        cubeProgram.addAttribute("normal");
-        checkGLError("Plane Params");
     }
 
     @Override
@@ -198,6 +189,11 @@ public class Akinetopsia extends Scene {
         return RATES.length;
     }
 
+    /**
+     * Rotate all the blocks around the viewer. Each layer of blocks rotates
+     * faster than the layer beneath it. The rates were chosen so the blocks
+     * line up every once and a while.
+     */
     private void rotateBlocks() {
         final int BLOCKS_PER_LAYER = 4;
         // How many degrees/frame a layer rotates. Must be a factor of 90

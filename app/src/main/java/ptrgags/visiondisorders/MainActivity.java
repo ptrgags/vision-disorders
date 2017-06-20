@@ -13,8 +13,8 @@ import com.google.vr.sdk.base.GvrView;
 import com.google.vr.sdk.base.HeadTransform;
 import com.google.vr.sdk.base.Viewport;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,16 +28,27 @@ import ptrgags.visiondisorders.scenes.Hemianopia;
 import ptrgags.visiondisorders.scenes.Scene;
 import ptrgags.visiondisorders.scenes.Tetrachromacy;
 
-public class MainActivity extends GvrActivity implements GvrView.StereoRenderer {
+/**
+ * This is the only activity in the app. It is a Google VR activity
+ * that handles switching between the different scenes.
+ *
+ * This class also can render an indicator showing which mode the user
+ * is currently in.
+ */
+public class MainActivity
+        extends GvrActivity
+        implements GvrView.StereoRenderer {
+    /** list of scenes to cycle through. */
     private List<Scene> scenes = new ArrayList<>();
-    private int selectedScene = 0;
+    /** Current scene number */
+    private int selectedSceneIndex = 0;
+    /** shader program for the mode indicator overlay */
     private ShaderProgram indicatorProgram;
-    // Camera for the indicator
+    /** Camera for the indicator */
     private Camera camera;
-    // Plane for rendering the mode indicator.
+    /** Plane for rendering the mode indicator */
     private Model indicatorPlane;
-
-    // Set this to true to show the indicators.
+    /** Set this to true to show the indicators. By default they are off */
     private boolean indicatorsVisible = false;
 
     /**
@@ -65,6 +76,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         createScenes();
     }
 
+    /**
+     * Initialize all the scenes and add them to the list.
+     */
     private void createScenes() {
         Scene colorblindness = new Colorblindness();
         scenes.add(colorblindness);
@@ -84,21 +98,24 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     @Override
     public void onNewFrame(HeadTransform headTransform) {
-        scenes.get(selectedScene).onFrame();
+        scenes.get(selectedSceneIndex).onFrame();
     }
 
     @Override
     public void onDrawEye(Eye eye) {
-        scenes.get(selectedScene).onDraw(eye);
+        scenes.get(selectedSceneIndex).onDraw(eye);
 
         if (indicatorsVisible)
             drawIndicators();
     }
 
+    /**
+     * Draw indicator circles in orthographic projection on top of the
+     * scene. This can help to see how many simulations/variations are
+     * available.
+     */
     private void drawIndicators() {
         //Set drawing bits.
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        GLES20.glEnable(GLES20.GL_CULL_FACE);
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         checkGLError("Color settings");
@@ -113,47 +130,36 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         indicatorProgram.use();
 
         //Set the matrices
-        GLES20.glUniformMatrix4fv(
-                indicatorProgram.getUniform("projection"),
-                1, false, orthoProjection, 0);
-        GLES20.glUniformMatrix4fv(
-                indicatorProgram.getUniform("view"), 1, false, cameraView, 0);
-        GLES20.glUniformMatrix4fv(
-                indicatorProgram.getUniform("model"),
-                1, false, indicatorPlane.getModelMatrix(), 0);
+        indicatorProgram.setUniformMatrix("projection", orthoProjection);
+        indicatorProgram.setUniformMatrix("view", cameraView);
+        float[] model = indicatorPlane.getModelMatrix();
+        indicatorProgram.setUniformMatrix("model", model);
 
-        // Set the simuulation/variation indicators
-        GLES20.glUniform1i(
-                indicatorProgram.getUniform("num_simulations"), scenes.size());
-        GLES20.glUniform1i(
-                indicatorProgram.getUniform("selected_simulation"),
-                selectedScene);
+        // Set the simulation indicators
+        indicatorProgram.setUniform("num_simulations", scenes.size());
+        indicatorProgram.setUniform("selected_simulation", selectedSceneIndex);
 
-        //TODO: Set these dynamically
-        GLES20.glUniform1i(
-                indicatorProgram.getUniform("num_variations"),
-                scenes.get(selectedScene).getNumModes());
-        GLES20.glUniform1i(
-                indicatorProgram.getUniform("selected_variation"),
-                scenes.get(selectedScene).getMode());
+        // Set the scene variation indicators
+        Scene selectedScene = scenes.get(selectedSceneIndex);
+        indicatorProgram.setUniform(
+                "num_variations", selectedScene.getNumModes());
+        indicatorProgram.setUniform(
+                "selected_variation", selectedScene.getMode());
+
+        // Enable attribute buffers
+        indicatorProgram.enableAttribute("position");
+        indicatorProgram.enableAttribute("uv");
 
         // Set the attributes
-        int posParam = indicatorProgram.getAttribute("position");
-        int uvParam = indicatorProgram.getAttribute("uv");
-        GLES20.glVertexAttribPointer(
-                posParam, 4, GLES20.GL_FLOAT, false, 0,
-                indicatorPlane.getModelCoords());
-        GLES20.glVertexAttribPointer(
-                uvParam, 2, GLES20.GL_FLOAT, false, 0,
-                indicatorPlane.getUVCoords());
+        FloatBuffer modelCoords = indicatorPlane.getModelCoords();
+        indicatorProgram.setAttribute("position", modelCoords, 4);
+        FloatBuffer uvCoords = indicatorPlane.getUVCoords();
+        indicatorProgram.setAttribute("uv", uvCoords, 2);
 
-        GLES20.glEnableVertexAttribArray(posParam);
-        GLES20.glEnableVertexAttribArray(uvParam);
+        indicatorProgram.draw(indicatorPlane.getNumVertices());
 
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6);
-
-        GLES20.glDisableVertexAttribArray(posParam);
-        GLES20.glDisableVertexAttribArray(uvParam);
+        // Disable the attribute buffers
+        indicatorProgram.disableAttributes();
 
         // Turn off blending.
         GLES20.glDisable(GLES20.GL_BLEND);
@@ -172,30 +178,22 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         //Also create the shaders
         Map<String, Shader> shaders = makeShaders();
-        Map<String, Texture> textures = makeTextures();
         for (Scene scene : scenes) {
             scene.initShaders(shaders);
-            scene.initTextures(textures);
         }
 
         initIndicator(shaders);
     }
 
+    /**
+     * Initialize a pseudo-Scene for the mode indicator.
+     * @param shaders the map of shader names and shaders.
+     */
     private void initIndicator(Map<String, Shader> shaders) {
         Shader vert = shaders.get("vert_uv");
         Shader frag = shaders.get("frag_indicator");
         indicatorProgram = new ShaderProgram(vert, frag);
         checkGLError("Plane program");
-        indicatorProgram.addUniform("model");
-        indicatorProgram.addUniform("view");
-        indicatorProgram.addUniform("projection");
-        indicatorProgram.addUniform("num_simulations");
-        indicatorProgram.addUniform("selected_simulation");
-        indicatorProgram.addUniform("num_variations");
-        indicatorProgram.addUniform("selected_variation");
-        indicatorProgram.addAttribute("position");
-        indicatorProgram.addAttribute("uv");
-        checkGLError("Program Params");
 
         camera = new Camera();
         camera.setPosition(0.0f, 0.0f, 0.1f);
@@ -207,49 +205,34 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         indicatorPlane.rotate(90, 1, 0, 0);
     }
 
+    /**
+     * Compile all the shadeers needed and make a map of them with
+     * unique Ids. then Scenes can select these shaders as needed.
+     * @return a map of shader ID -> shader. IDs always start with
+     * vert_ or frag_ to denote the shader type
+     */
     private Map<String,Shader> makeShaders() {
-        //Make Vertex shaders
-        Map<String, Shader> shaders = new HashMap<>();
+        ShaderMapBuilder builder = new ShaderMapBuilder(this);
 
-        // Create shaders
-        Shader colorblindness = new Shader(
-                GLES20.GL_FRAGMENT_SHADER, R.raw.color_blindness, this);
-        Shader lighting = new Shader(
-                GLES20.GL_VERTEX_SHADER, R.raw.lighting, this);
-        Shader lambert = new Shader(
-                GLES20.GL_FRAGMENT_SHADER, R.raw.lambert, this);
-        Shader skyboxVert = new Shader(
-                GLES20.GL_VERTEX_SHADER, R.raw.skybox_vert, this);
-        Shader skyboxFrag = new Shader(
-                GLES20.GL_FRAGMENT_SHADER, R.raw.skybox_frag, this);
-        Shader tetraFrag = new Shader(
-                GLES20.GL_FRAGMENT_SHADER, R.raw.tetrachrome_frag, this);
-        Shader simpleUV = new Shader(
-                GLES20.GL_VERTEX_SHADER, R.raw.simple_uv, this);
-        Shader indicatorFrag = new Shader(
-                GLES20.GL_FRAGMENT_SHADER, R.raw.mode_indicator, this);
+        // Compile the vertex shaders
+        // Used in colorblindness, akinetopsia and hemianopia simulations
+        builder.makeShader("vert_lighting", R.raw.lighting_vert);
+        // Used in tetrachromacy and mode indicator shaders
+        builder.makeShader("vert_uv", R.raw.uv_vert);
 
-        // Store the shaders in a hash map
-        shaders.put("frag_colorblind", colorblindness);
-        shaders.put("vert_lighting", lighting);
-        shaders.put("frag_lambert", lambert);
-        shaders.put("vert_skybox", skyboxVert);
-        shaders.put("frag_skybox", skyboxFrag);
-        shaders.put("frag_tetrachrome", tetraFrag);
-        shaders.put("vert_uv", simpleUV);
-        shaders.put("frag_indicator", indicatorFrag);
+        // Compile the fragment shaders
+        //Used in colorblindness simulation
+        builder.makeShader("frag_colorblindness", R.raw.colorblindness_frag);
+        // Used in akinetopsia and hemianopia simulations
+        builder.makeShader("frag_lambert", R.raw.lambert_frag);
+        // Used in the tetrachromacy simulation
+        builder.makeShader("frag_tetrachromacy", R.raw.tetrachromacy_frag);
+        // Used in the mode indicator shader
+        builder.makeShader("frag_indicator", R.raw.indicator_frag);
 
-        return shaders;
-    }
+        // Fetch the map of compiled shaders
+        return builder.getShaderMap();
 
-    private Map<String, Texture> makeTextures() {
-        Texture citySkybox = new Texture(this, R.drawable.skybox_city);
-        Texture colorful = new Texture(this, R.drawable.colorful);
-
-        Map<String, Texture> textures = new HashMap<>();
-        textures.put("city_skybox", citySkybox);
-        textures.put("colorful", colorful);
-        return textures;
     }
 
     @Override
@@ -257,9 +240,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     @Override
     public void onCardboardTrigger() {
-        scenes.get(selectedScene).next();
+        scenes.get(selectedSceneIndex).next();
     }
 
+    /**
+     * Check for OpenGL errors and raise an exception on error
+     * @param label the label for the message
+     */
     public static void checkGLError(String label) {
         int error = GLES20.glGetError();
         if (error != GLES20.GL_NO_ERROR) {
@@ -287,16 +274,17 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             case KeyEvent.KEYCODE_BUTTON_Y:
             case KeyEvent.KEYCODE_DPAD_UP:
             case KeyEvent.KEYCODE_BUTTON_R2:
-                scenes.get(selectedScene).next();
+                scenes.get(selectedSceneIndex).next();
                 break;
             case KeyEvent.KEYCODE_BUTTON_A:
             case KeyEvent.KEYCODE_DPAD_DOWN:
             case KeyEvent.KEYCODE_BUTTON_L2:
-                scenes.get(selectedScene).prev();
+                scenes.get(selectedSceneIndex).prev();
                 break;
             case KeyEvent.KEYCODE_BUTTON_START:
-                scenes.get(selectedScene).reset();
+                scenes.get(selectedSceneIndex).reset();
             case KeyEvent.KEYCODE_BUTTON_SELECT:
+                // Toggle showing mode indicators.
                 indicatorsVisible = !indicatorsVisible;
             default:
                 Log.i("Vision Disorders", "User pressed: " + event.toString());
@@ -304,21 +292,27 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         return true;
     }
 
+    /**
+     * Cycle to the next scene.
+     */
     private void nextScene() {
-        selectedScene++;
-        selectedScene %= scenes.size();
+        selectedSceneIndex++;
+        selectedSceneIndex %= scenes.size();
 
-        scenes.get(selectedScene).reset();
+        scenes.get(selectedSceneIndex).reset();
     }
 
+    /**
+     * Cycle to the previous scene.
+     */
     private void prevScene() {
-        selectedScene--;
-        selectedScene %= scenes.size();
+        selectedSceneIndex--;
+        selectedSceneIndex %= scenes.size();
 
         // I miss Python :(
-        if (selectedScene < 0)
-            selectedScene += scenes.size();
+        if (selectedSceneIndex < 0)
+            selectedSceneIndex += scenes.size();
 
-        scenes.get(selectedScene).reset();
+        scenes.get(selectedSceneIndex).reset();
     }
 }

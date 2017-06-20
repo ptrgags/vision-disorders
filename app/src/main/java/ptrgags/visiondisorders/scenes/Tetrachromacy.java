@@ -1,6 +1,5 @@
 package ptrgags.visiondisorders.scenes;
 
-import android.opengl.GLES20;
 import android.opengl.Matrix;
 
 import com.google.vr.sdk.base.Eye;
@@ -15,18 +14,38 @@ import ptrgags.visiondisorders.models.Model;
 import ptrgags.visiondisorders.models.Skybox;
 
 /**
- * Created by Peter on 5/15/2017.
+ * A small percentage of women have a fourth cone cell between red and green
+ * which allows them to see many more colors than the rest of us.
+ *
+ * Since I can't simulate having extra cones, I decided to explain
+ * tetrachromacy by analogy with color depth
+ *
+ * Go back in time to when there was only a few colors per red/green/blue
+ * channel. it was possible to have pictures, but they seemed rather
+ * posterized compared to the colorful images we have with 8+ bits per
+ * color channel. The difference? We can see many times more shades of color.
+ *
+ * This simulation consists of a skybox shape but shaded with a custom
+ * shader that draws a rainbow either at a low or high color depth.
+ *
+ * Variations:
+ * 0. Reduced color-depth image as an analogy to regular trichromatic vision
+ * 1. Full-color image as an analogy to tetrachromatic vision.
  */
-
 public class Tetrachromacy extends Scene {
+    /** colors for each mode */
     private static final float[] MODE_COLORS = new float[] {
-        8.0f,   // Normal color
+        8.0f,   // Analogous to normal color
         256.0f // Tetrachromacy: Much more color differentiation
     };
 
+    /** Camera for viewing the scene */
     private Camera camera;
-    private ShaderProgram skyboxProgram;
+    /** Tetrachromacy shader program */
+    private ShaderProgram program;
+    /** skybox that will be rendered with the custom shader */
     private Model skybox;
+    /** some unit of time for animating the shader */
     private float time = 0;
 
     @Override
@@ -42,11 +61,7 @@ public class Tetrachromacy extends Scene {
 
     @Override
     public void onDraw(Eye eye) {
-        //Set drawing bits.
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        GLES20.glEnable(GLES20.GL_CULL_FACE);
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        checkGLError("Color settings");
+        super.onDraw(eye);
 
         //Get the projection matrix
         float[] projection = eye.getPerspective(25.0f, 100.0f);
@@ -57,64 +72,43 @@ public class Tetrachromacy extends Scene {
         float[] view = new float[16];
         Matrix.multiplyMM(view, 0, eyeView, 0, cameraView, 0);
 
-        skyboxProgram.use();
-        GLES20.glUniformMatrix4fv(
-                skyboxProgram.getUniform("projection"),
-                1, false, projection, 0);
-        GLES20.glUniformMatrix4fv(
-                skyboxProgram.getUniform("view"), 1, false, view, 0);
-
-        int modelParam = skyboxProgram.getUniform("model");
-        int posParam = skyboxProgram.getAttribute("position");
-        int uvParam = skyboxProgram.getAttribute("uv");
+        // Set uniform matrices
+        program.use();
+        program.setUniformMatrix("projection", projection);
+        program.setUniformMatrix("view", view);
 
         //Enable all the attribute buffers
-        GLES20.glEnableVertexAttribArray(posParam);
-        GLES20.glEnableVertexAttribArray(uvParam);
+        program.enableAttribute("position");
+        program.enableAttribute("uv");
 
         //Set the parameters
         FloatBuffer modelCoords = skybox.getModelCoords();
-        GLES20.glVertexAttribPointer(
-                posParam, 4, GLES20.GL_FLOAT, false, 0, modelCoords);
+        program.setAttribute("position", modelCoords, 4);
         FloatBuffer modelUV = skybox.getUVCoords();
-        GLES20.glVertexAttribPointer(
-                uvParam, 2, GLES20.GL_FLOAT, false, 0, modelUV);
+        program.setAttribute("uv", modelUV, 2);
 
         //Set the number of colors
-        GLES20.glUniform1f(
-                skyboxProgram.getUniform("num_colors"), MODE_COLORS[mode]);
-        //Set the current time
-        GLES20.glUniform1f(
-                skyboxProgram.getUniform("time"), time);
+        program.setUniform("num_colors", MODE_COLORS[mode]);
+        program.setUniform("time", time);
 
         // load the model matrix into the GPU
         float[] model = skybox.getModelMatrix();
-        GLES20.glUniformMatrix4fv(modelParam, 1, false, model, 0);
+        program.setUniformMatrix("model", model);
 
-        //TODO: models should have a way to get the number of vertices
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 36);
+        program.draw(skybox.getNumVertices());
 
-        checkGLError("Render Cube");
+        checkGLError("Render Skybox");
 
         // Disable the attribute buffers
-        GLES20.glDisableVertexAttribArray(posParam);
-        GLES20.glDisableVertexAttribArray(uvParam);
+        program.disableAttributes();
     }
 
     @Override
     public void initShaders(Map<String, Shader> shaders) {
         Shader vert = shaders.get("vert_uv");
-        Shader frag = shaders.get("frag_tetrachrome");
-        skyboxProgram = new ShaderProgram(vert, frag);
+        Shader frag = shaders.get("frag_tetrachromacy");
+        program = new ShaderProgram(vert, frag);
         checkGLError("Plane program");
-        skyboxProgram.addUniform("model");
-        skyboxProgram.addUniform("view");
-        skyboxProgram.addUniform("projection");
-        skyboxProgram.addUniform("num_colors");
-        skyboxProgram.addUniform("time");
-        skyboxProgram.addAttribute("position");
-        skyboxProgram.addAttribute("uv");
-        checkGLError("Program Params");
     }
 
     @Override

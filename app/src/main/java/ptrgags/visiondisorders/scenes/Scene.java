@@ -8,13 +8,13 @@ import com.google.vr.sdk.base.Eye;
 import java.util.Map;
 
 import ptrgags.visiondisorders.Shader;
-import ptrgags.visiondisorders.Texture;
 
 /**
- * A scene manages the models and
+ * A scene manages the models and shaders for a single simulation.
+ * It also has a number of variations that can be cycled through.
  */
 public abstract class Scene {
-    // Mode number;
+    /** Mode number */
     protected int mode;
 
     /**
@@ -23,10 +23,17 @@ public abstract class Scene {
     public abstract void initScene();
 
     /**
-     * Draw event
+     * Draw event. This should be overriden in subclasses with a call
+     * to super.onDraw() somewhere at the beginning.
      * @param eye the eye to assist with computation.
      */
-    public abstract void onDraw(Eye eye);
+    public void onDraw(Eye eye) {
+        //Set drawing bits.
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        GLES20.glEnable(GLES20.GL_CULL_FACE);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        checkGLError("Color settings");
+    };
 
     /**
      * Initialize ShaderPrograms. The Shader objects are preallocated in
@@ -35,8 +42,10 @@ public abstract class Scene {
      */
     public abstract void initShaders(Map<String, Shader> shaders);
 
-    public void initTextures(Map<String, Texture> textures){}
-
+    /**
+     * Check for OpenGL errors and raise exceptions if something goes wrong
+     * @param label the label to
+     */
     public static void checkGLError(String label) {
         int error = GLES20.glGetError();
         if (error != GLES20.GL_NO_ERROR) {
@@ -71,6 +80,9 @@ public abstract class Scene {
         mode = 0;
     }
 
+    /**
+     * Called once per frame
+     */
     public void onFrame() {}
 
     /**
