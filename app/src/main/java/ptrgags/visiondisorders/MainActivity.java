@@ -164,10 +164,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         //Also create the shaders
         Map<String, Shader> shaders = makeShaders();
-        Map<String, Texture> textures = makeTextures();
         for (Scene scene : scenes) {
             scene.initShaders(shaders);
-            scene.initTextures(textures);
         }
 
         initIndicator(shaders);
@@ -223,17 +221,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         shaders.put("frag_indicator", indicatorFrag);
 
         return shaders;
-    }
-
-    //TODO: Can we delete this?
-    private Map<String, Texture> makeTextures() {
-        Texture citySkybox = new Texture(this, R.drawable.skybox_city);
-        Texture colorful = new Texture(this, R.drawable.colorful);
-
-        Map<String, Texture> textures = new HashMap<>();
-        textures.put("city_skybox", citySkybox);
-        textures.put("colorful", colorful);
-        return textures;
     }
 
     @Override

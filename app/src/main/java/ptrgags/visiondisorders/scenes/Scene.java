@@ -8,7 +8,6 @@ import com.google.vr.sdk.base.Eye;
 import java.util.Map;
 
 import ptrgags.visiondisorders.Shader;
-import ptrgags.visiondisorders.Texture;
 
 /**
  * TODO: Document me!
@@ -42,9 +41,6 @@ public abstract class Scene {
      * @param shaders a map of shader names -> Shader objects available.
      */
     public abstract void initShaders(Map<String, Shader> shaders);
-
-    //TODO: Can we delete this?
-    public void initTextures(Map<String, Texture> textures){}
 
     public static void checkGLError(String label) {
         int error = GLES20.glGetError();
