@@ -149,3 +149,38 @@ Variations:
 1. Low color depth image - Pretend this is what a normal person can see
 2. High color depth image - Notice the sudden increase of visible shades. This
    is analogous to tetrachromacy.
+   
+## References
+
+Here are sources I referred to when making my project. Some were used for my in-class presentation.
+
+* “Color Blindness Simulation.”, Internet Archive: Wayback Machine, 14 Oct.
+  2008, web.archive.org/web/20081014161121/http://www.colorjack.com/labs/colormatrix/.
+  Accessed 26 May 2017. 
+* Deleniv, S. “The Mystery of Tetrachromacy: If 12% of Women Have Four Cone
+  Types in Their Eyes, Why Do So Few of Them Actually See More Colours?” The
+  Neurosphere, 16 Dec. 2015,
+  http://theneurosphere.com/2015/12/17/the-mystery-of-tetrachromacy-if-12-of-women-have-four-cone-types-in-their-eyes-why-do-so-few-of-them-actually-see-more-colours/.
+  Accessed 26 May 2017.
+* Flück, Daniel. “Colorblind Colors of Confusion” Colblindor, 19 Jan. 2009,
+  http://www.color-blindness.com/2009/01/19/colorblind-colors-of-confusion/.
+  Accessed 26 May 2017.
+* Flück, Daniel. “Colorblind Population” Colblindor, 28 Apr. 2006,
+  http://www.color-blindness.com/2006/04/28/colorblind-population/.
+  Accessed 26 May 2017.
+* Flück, Daniel. “Confusion Lines of the CIE 1931 Color Space.” Colblindor,
+  23 Jan. 2007,
+  http://www.color-blindness.com/2007/01/23/confusion-lines-of-the-cie-1931-color-space/.
+  Accessed 26 May 2017.
+* Flück, Daniel. “Types of Color Blindness” Colblindor,
+  http://www.color-blindness.com/types-of-color-blindness/
+  Accessed 26 May 2017.
+* “Hemianopia.” Help For Vision Loss, Noravision, 2017,
+  http://www.helpforvisionloss.com/group-holder/2011-06-18-17-13-45/hemianopia.html.
+  Accessed 26 May 2017.
+* Moore, Jesse. “Physiology.” Akinetopsia,
+  http://mooreperceptionproject.weebly.com/physiology.html.
+  Accessed 26 May 2017.
+* Moore, Jesse. “Symptoms.” Akinetopsia,
+  http://mooreperceptionproject.weebly.com/symptoms.html. 
+  Accessed 26 May 2017.
